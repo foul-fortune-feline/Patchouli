@@ -1,7 +1,6 @@
 package vazkii.patchouli.mixin.client;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.MinecraftClient;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -10,10 +9,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import vazkii.patchouli.client.base.ClientAdvancements;
 
-@Mixin(Minecraft.class)
+@Mixin(MinecraftClient.class)
 public class MixinMinecraft {
-	@Inject(at = @At("HEAD"), method = "clearLevel(Lnet/minecraft/client/gui/screens/Screen;)V")
-	public void patchouli_onLogout(Screen screen, CallbackInfo info) {
+	@Inject(at = @At("HEAD"), method = "close()V")
+	public void patchouli_onLogout(CallbackInfo info) {
 		ClientAdvancements.playerLogout();
 	}
 

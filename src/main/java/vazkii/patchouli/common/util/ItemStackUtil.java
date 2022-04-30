@@ -1,5 +1,7 @@
 package vazkii.patchouli.common.util;
 
+import com.google.common.collect.Interner;
+import com.google.common.collect.Interners;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -8,18 +10,23 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
 
-import net.minecraft.core.Registry;
-import net.minecraft.nbt.CompoundTag;
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
+import net.fabricmc.fabric.impl.tag.convention.TagRegistration;
+import net.fabricmc.fabric.mixin.datagen.AbstractTagProviderMixin;
+import net.minecraft.data.server.ItemTagProvider;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.TagParser;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.tags.Tag;
-import net.minecraft.util.GsonHelper;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
 
+import net.minecraft.nbt.StringNbtReader;
+import net.minecraft.recipe.Ingredient;
+import net.minecraft.tag.*;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.JsonHelper;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryKey;
+import net.minecraft.util.registry.SimpleRegistry;
 import vazkii.patchouli.common.book.Book;
 import vazkii.patchouli.common.book.BookRegistry;
 import vazkii.patchouli.common.item.ItemModBook;
@@ -32,7 +39,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.StringJoiner;
 
+import static vazkii.patchouli.common.base.Patchouli.MOD_ID;
+
 public final class ItemStackUtil {
+	private static final Interner<Tag<Item>> INTERNER = Interners.newWeakInterner();
 	private static final Gson GSON = new GsonBuilder().create();
 
 	private ItemStackUtil() {}
@@ -47,8 +57,8 @@ public final class ItemStackUtil {
 			builder.append(count);
 		}
 
-		if (stack.hasTag()) {
-			Dynamic<?> dyn = new Dynamic<>(NbtOps.INSTANCE, stack.getTag());
+		if (stack.hasNbt()) {
+			Dynamic<?> dyn = new Dynamic<>(NbtOps.INSTANCE, stack.getNbt());
 			JsonElement j = dyn.convert(JsonOps.INSTANCE).getValue();
 			builder.append(GSON.toJson(j));
 		}
@@ -77,8 +87,8 @@ public final class ItemStackUtil {
 		}
 
 		int countn = Integer.parseInt(count);
-		ResourceLocation key = new ResourceLocation(tokens[0], tokens[1]);
-		Optional<Item> maybeItem = Registry.ITEM.getOptional(key);
+		Identifier key = new Identifier(tokens[0], tokens[1]);
+		Optional<Item> maybeItem = Registry.ITEM.getOrEmpty(key);
 		if (maybeItem.isEmpty()) {
 			throw new RuntimeException("Unknown item ID: " + key);
 		}
@@ -87,7 +97,7 @@ public final class ItemStackUtil {
 
 		if (!nbt.isEmpty()) {
 			try {
-				stack.setTag(TagParser.parseTag(nbt));
+				stack.setNbt(StringNbtReader.parse(nbt));
 			} catch (CommandSyntaxException e) {
 				throw new RuntimeException("Failed to parse ItemStack JSON", e);
 			}
@@ -97,7 +107,7 @@ public final class ItemStackUtil {
 	}
 
 	public static String serializeIngredient(Ingredient ingredient) {
-		ItemStack[] stacks = ingredient.getItems();
+		ItemStack[] stacks = ingredient.getMatchingStacks();
 		String[] stacksSerialized = new String[stacks.length];
 		for (int i = 0; i < stacks.length; i++) {
 			stacksSerialized[i] = serializeStack(stacks[i]);
@@ -107,7 +117,7 @@ public final class ItemStackUtil {
 	}
 
 	public static Ingredient loadIngredientFromString(String ingredientString) {
-		return Ingredient.of(loadStackListFromString(ingredientString).toArray(new ItemStack[0]));
+		return Ingredient.ofStacks(loadStackListFromString(ingredientString).toArray(new ItemStack[0]));
 	}
 
 	public static String serializeStackList(List<ItemStack> stacks) {
@@ -123,9 +133,14 @@ public final class ItemStackUtil {
 		List<ItemStack> stacks = new ArrayList<>();
 		for (String s : stacksSerialized) {
 			if (s.startsWith("tag:")) {
-				Tag<Item> tag = ItemTags.getAllTags().getTag(new ResourceLocation(s.substring(4)));
+//				FabricTagProvider.ItemTagProvider.
+//				TagManagerLoader
+//				Tag<Item> tag = ItemTags.getAllTags().getTag(new ResourceLocation(s.substring(4)));
+//				Tag<Item> tag = Tag
+//				TagKey<Item> tag = TagKey.of(Registry.ITEM_KEY, new Identifier(MOD_ID, s.substring(4)));
+//				Tag<Item> tag = TagKey.of(Registry.ITEM_KEY, new Identifier(MOD)
 				if (tag != null) {
-					for (Item item : tag.getValues()) {
+					for (Item item : tag.values()) {
 						stacks.add(new ItemStack(item));
 					}
 				}
@@ -135,6 +150,24 @@ public final class ItemStackUtil {
 		}
 		return stacks;
 	}
+
+//	public static List<ItemStack> loadStackListFromString(String ingredientString) {
+//		String[] stacksSerialized = splitStacksFromSerializedIngredient(ingredientString);
+//		List<ItemStack> stacks = new ArrayList<>();
+//		for (String s : stacksSerialized) {
+//			if (s.startsWith("tag:")) {
+//				if (tag != null) {
+//					for (Item item : tag.getValues()) {
+//						stacks.add(new ItemStack(item));
+//					}
+//				}
+//			} else {
+//				stacks.add(loadStackFromString(s));
+//			}
+//		}
+//		return stacks;
+//	}
+
 
 	public static StackWrapper wrapStack(ItemStack stack) {
 		return stack.isEmpty() ? StackWrapper.EMPTY_WRAPPER : new StackWrapper(stack);
@@ -148,7 +181,7 @@ public final class ItemStackUtil {
 
 		Collection<Book> books = BookRegistry.INSTANCE.books.values();
 		for (Book b : books) {
-			if (b.getBookItem().sameItemStackIgnoreDurability(stack)) {
+			if (b.getBookItem().isItemEqualIgnoreDamage(stack)) {
 				return b;
 			}
 		}
@@ -168,7 +201,7 @@ public final class ItemStackUtil {
 
 		@Override
 		public boolean equals(Object obj) {
-			return obj == this || (obj instanceof StackWrapper && ItemStack.isSameIgnoreDurability(stack, ((StackWrapper) obj).stack));
+			return obj == this || (obj instanceof StackWrapper && stack.isItemEqualIgnoreDamage(((StackWrapper) obj).stack));
 		}
 
 		@Override
@@ -191,28 +224,28 @@ public final class ItemStackUtil {
 		Character insideString = null;
 		for (int i = 0; i < ingredientSerialized.length(); i++) {
 			switch (ingredientSerialized.charAt(i)) {
-			case '{':
-				if (insideString == null) {
-					braces++;
-				}
-				break;
-			case '}':
-				if (insideString == null) {
-					braces--;
-				}
-				break;
-			case '\'':
-				insideString = insideString == null ? '\'' : null;
-				break;
-			case '"':
-				insideString = insideString == null ? '"' : null;
-				break;
-			case ',':
-				if (braces <= 0) {
-					result.add(ingredientSerialized.substring(lastIndex, i));
-					lastIndex = i + 1;
+				case '{':
+					if (insideString == null) {
+						braces++;
+					}
 					break;
-				}
+				case '}':
+					if (insideString == null) {
+						braces--;
+					}
+					break;
+				case '\'':
+					insideString = insideString == null ? '\'' : null;
+					break;
+				case '"':
+					insideString = insideString == null ? '"' : null;
+					break;
+				case ',':
+					if (braces <= 0) {
+						result.add(ingredientSerialized.substring(lastIndex, i));
+						lastIndex = i + 1;
+						break;
+					}
 			}
 		}
 
@@ -225,21 +258,21 @@ public final class ItemStackUtil {
 		// Adapted from net.minecraftforge.common.crafting.CraftingHelper::getItemStack
 		String itemName = json.get("item").getAsString();
 
-		Item item = Registry.ITEM.getOptional(new ResourceLocation(itemName)).orElseThrow(() -> new IllegalArgumentException("Unknown item '" + itemName + "'")
+		Item item = Registry.ITEM.getOrEmpty(new Identifier(itemName)).orElseThrow(() -> new IllegalArgumentException("Unknown item '" + itemName + "'")
 		);
 
-		ItemStack stack = new ItemStack(item, GsonHelper.getAsInt(json, "count", 1));
+		ItemStack stack = new ItemStack(item, JsonHelper.getInt(json, "count", 1));
 
 		if (json.has("nbt")) {
 			try {
 				JsonElement element = json.get("nbt");
-				CompoundTag nbt;
+				NbtCompound nbt;
 				if (element.isJsonObject()) {
-					nbt = TagParser.parseTag(GSON.toJson(element));
+					nbt = StringNbtReader.parse(GSON.toJson(element));
 				} else {
-					nbt = TagParser.parseTag(element.getAsString());
+					nbt = StringNbtReader.parse(element.getAsString());
 				}
-				stack.setTag(nbt);
+				stack.setNbt(nbt);
 			} catch (CommandSyntaxException e) {
 				throw new IllegalArgumentException("Invalid NBT Entry: " + e, e);
 			}

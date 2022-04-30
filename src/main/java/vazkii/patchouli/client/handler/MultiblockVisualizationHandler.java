@@ -356,7 +356,7 @@ public class MultiblockVisualizationHandler {
 
 	private static MultiBufferSource.BufferSource initBuffers(MultiBufferSource.BufferSource original) {
 		BufferBuilder fallback = ((AccessorMultiBufferSource) original).getFallbackBuffer();
-		Map<RenderType, BufferBuilder> layerBuffers = ((AccessorMultiBufferSource) original).getFixedBuffers();
+		Map<RenderType, BufferBuilder> layerBuffers = ((AccessorMultiBufferSource) original).getBuffers();
 		Map<RenderType, BufferBuilder> remapped = new Object2ObjectLinkedOpenHashMap<>();
 		for (Map.Entry<RenderType, BufferBuilder> e : layerBuffers.entrySet()) {
 			remapped.put(GhostRenderLayer.remap(e.getKey()), e.getValue());

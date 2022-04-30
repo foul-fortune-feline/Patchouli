@@ -39,12 +39,12 @@ public abstract class MixinInventoryScreen extends EffectRenderingInventoryScree
 
 		Widget replaced = null;
 		Button replacement = null;
-		for (int i = 0; i < ((AccessorScreen) this).getRenderables().size(); i++) {
-			Widget button = ((AccessorScreen) this).getRenderables().get(i);
+		for (int i = 0; i < ((AccessorScreen) this).getDrawables().size(); i++) {
+			Widget button = ((AccessorScreen) this).getDrawables().get(i);
 			if (button instanceof ImageButton tex) {
 				replaced = button;
 				replacement = new GuiButtonInventoryBook(book, tex.x, tex.y - 1);
-				((AccessorScreen) this).getRenderables().set(i, replacement);
+				((AccessorScreen) this).getDrawables().set(i, replacement);
 				break;
 			}
 		}
@@ -54,9 +54,9 @@ public abstract class MixinInventoryScreen extends EffectRenderingInventoryScree
 			((List<GuiEventListener>) children()).set(i, replacement);
 		}
 
-		i = ((AccessorScreen) this).getNarratables().indexOf(replaced);
+		i = ((AccessorScreen) this).getSelectables().indexOf(replaced);
 		if (i >= 0) {
-			((AccessorScreen) this).getNarratables().set(i, replacement);
+			((AccessorScreen) this).getSelectables().set(i, replacement);
 		}
 	}
 }

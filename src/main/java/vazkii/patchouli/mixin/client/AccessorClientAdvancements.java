@@ -1,16 +1,18 @@
 package vazkii.patchouli.mixin.client;
 
-import net.minecraft.advancements.Advancement;
-import net.minecraft.advancements.AdvancementProgress;
-import net.minecraft.client.multiplayer.ClientAdvancements;
+import net.minecraft.advancement.Advancement;
+import net.minecraft.advancement.AdvancementManager;
+import net.minecraft.advancement.AdvancementProgress;
+//import net.minecraft.client.multiplayer.ClientAdvancements;
+import net.minecraft.client.network.ClientAdvancementManager;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.Map;
 
-@Mixin(ClientAdvancements.class)
+@Mixin(ClientAdvancementManager.class)
 public interface AccessorClientAdvancements {
-	@Accessor("progress")
+	@Accessor("advancementProgresses")
 	Map<Advancement, AdvancementProgress> getProgress();
 }

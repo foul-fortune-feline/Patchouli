@@ -1,24 +1,8 @@
 package vazkii.patchouli.common.item;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.core.NonNullList;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.level.Level;
-
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.Identifier;
 import vazkii.patchouli.api.PatchouliAPI;
 import vazkii.patchouli.client.book.BookEntry;
 import vazkii.patchouli.common.base.PatchouliSounds;
@@ -85,20 +69,20 @@ public class ItemModBook extends Item {
 	}
 
 	public static Book getBook(ItemStack stack) {
-		ResourceLocation res = getBookId(stack);
+		Identifier res = getBookId(stack);
 		if (res == null) {
 			return null;
 		}
 		return BookRegistry.INSTANCE.books.get(res);
 	}
 
-	private static ResourceLocation getBookId(ItemStack stack) {
-		if (!stack.hasTag() || !stack.getTag().contains(TAG_BOOK)) {
+	private static Identifier getBookId(ItemStack stack) {
+		if (!stack.hasNbt() || !stack.getNbt().contains(TAG_BOOK)) {
 			return null;
 		}
 
-		String bookStr = stack.getTag().getString(TAG_BOOK);
-		return ResourceLocation.tryParse(bookStr);
+		String bookStr = stack.getNbt().getString(TAG_BOOK);
+		return Identifier.tryParse(bookStr);
 	}
 
 	/* TODO fabric
