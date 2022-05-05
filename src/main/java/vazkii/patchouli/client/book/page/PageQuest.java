@@ -1,6 +1,6 @@
 package vazkii.patchouli.client.book.page;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.MatrixStack;
 
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.resources.language.I18n;
@@ -77,7 +77,7 @@ public class PageQuest extends PageWithText {
 	}
 
 	@Override
-	public void render(PoseStack ms, int mouseX, int mouseY, float pticks) {
+	public void render(MatrixStack ms, int mouseX, int mouseY, float pticks) {
 		super.render(ms, mouseX, mouseY, pticks);
 
 		parent.drawCenteredStringNoShadow(ms, title == null || title.isEmpty() ? I18n.get("patchouli.gui.lexicon.objective") : i18n(title), GuiBook.PAGE_WIDTH / 2, 0, book.headerColor);

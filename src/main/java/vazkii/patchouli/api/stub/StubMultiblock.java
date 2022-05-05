@@ -1,13 +1,11 @@
 package vazkii.patchouli.api.stub;
 
 import com.mojang.datafixers.util.Pair;
-
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Rotation;
-
+import net.minecraft.data.client.VariantSettings;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3i;
+import net.minecraft.world.World;
 import vazkii.patchouli.api.IMultiblock;
 
 import java.util.Collection;
@@ -35,12 +33,12 @@ public class StubMultiblock implements IMultiblock {
 	}
 
 	@Override
-	public ResourceLocation getID() {
-		return new ResourceLocation("patchouli", "stub");
+	public Identifier getID() {
+		return new Identifier("patchouli", "stub");
 	}
 
 	@Override
-	public IMultiblock setId(ResourceLocation res) {
+	public IMultiblock setId(Identifier res) {
 		return this;
 	}
 
@@ -50,27 +48,27 @@ public class StubMultiblock implements IMultiblock {
 	}
 
 	@Override
-	public void place(Level world, BlockPos pos, Rotation rotation) {
+	public void place(World world, BlockPos pos, VariantSettings.Rotation rotation) {
 		// NO-OP
 	}
 
 	@Override
-	public Pair<BlockPos, Collection<SimulateResult>> simulate(Level world, BlockPos anchor, Rotation rotation, boolean forView) {
-		return Pair.of(BlockPos.ZERO, Collections.emptyList());
+	public Pair<BlockPos, Collection<SimulateResult>> simulate(World world, BlockPos anchor, VariantSettings.Rotation rotation, boolean forView) {
+		return Pair.of(BlockPos.ORIGIN, Collections.emptyList());
 	}
 
 	@Override
-	public Rotation validate(Level world, BlockPos pos) {
+	public VariantSettings.Rotation validate(World world, BlockPos pos) {
 		return null;
 	}
 
 	@Override
-	public boolean validate(Level world, BlockPos pos, Rotation rotation) {
+	public boolean validate(World world, BlockPos pos, VariantSettings.Rotation rotation) {
 		return false;
 	}
 
 	@Override
-	public boolean test(Level world, BlockPos start, int x, int y, int z, Rotation rotation) {
+	public boolean test(World world, BlockPos start, int x, int y, int z, VariantSettings.Rotation rotation) {
 		return false;
 	}
 

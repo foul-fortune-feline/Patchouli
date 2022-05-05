@@ -1,17 +1,12 @@
 package vazkii.patchouli.client.book.text;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextColor;
-import net.minecraft.network.chat.TextComponent;
-
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.text.*;
 import vazkii.patchouli.api.IStyleStack;
 import vazkii.patchouli.client.book.gui.GuiBook;
 import vazkii.patchouli.common.book.Book;
 
 import javax.annotation.Nullable;
-
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.LinkedList;
@@ -28,7 +23,7 @@ public class SpanState implements IStyleStack {
 	// this keeps a list of all modifications made to the style at each layer,
 	// so that when we replace the base style, we can reconstruct the style stack.
 	private final Deque<SpanPartialState> stateStack = new ArrayDeque<>();
-	public MutableComponent tooltip = BookTextParser.EMPTY_STRING_COMPONENT;
+	public MutableText tooltip = BookTextParser.EMPTY_STRING_COMPONENT;
 	public Supplier<Boolean> onClick = null;
 	public List<Span> cluster = null;
 	public boolean isExternalLink = false; // will show the "external link" symbol next to the link as soon as the link is closed
@@ -43,7 +38,8 @@ public class SpanState implements IStyleStack {
 		this.book = book;
 		this.baseStyle = baseStyle;
 		this.stateStack.push(new SpanPartialState(baseStyle, null));
-		this.spaceWidth = Minecraft.getInstance().font.width(new TextComponent(" ").setStyle(baseStyle));
+		this.spaceWidth = MinecraftClient.getInstance().textRenderer
+				.getWidth(MutableText.of(new LiteralTextContent(" ")).setStyle(baseStyle));
 	}
 
 	public Style getBase() {
@@ -73,7 +69,7 @@ public class SpanState implements IStyleStack {
 
 	@Override
 	public void pushStyle(Style style) {
-		stateStack.push(new SpanPartialState(style.applyTo(peekStyle()), style));
+		stateStack.push(new SpanPartialState(style.withParent(peekStyle()), style));
 	}
 
 	@Override
@@ -132,7 +128,7 @@ public class SpanState implements IStyleStack {
 
 		public void replaceBase(Style style) {
 			if (mergeStyle != null) {
-				style = mergeStyle.applyTo(style);
+				style = mergeStyle.withParent(style);
 			}
 			if (transformations != null) {
 				for (UnaryOperator<Style> f : transformations) {

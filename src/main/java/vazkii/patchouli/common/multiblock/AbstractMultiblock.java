@@ -2,11 +2,24 @@ package vazkii.patchouli.common.multiblock;
 
 import com.mojang.datafixers.util.Pair;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.data.client.VariantSettings;
 import net.minecraft.data.worldgen.biome.Biomes;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.fluid.FluidState;
+import net.minecraft.fluid.Fluids;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.BlockRotation;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3i;
+import net.minecraft.world.LightType;
+import net.minecraft.world.World;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ColorResolver;
@@ -31,11 +44,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public abstract class AbstractMultiblock implements IMultiblock, BlockAndTintGetter {
-	public ResourceLocation id;
+	public Identifier id;
 	protected int offX, offY, offZ;
 	protected int viewOffX, viewOffY, viewOffZ;
 	private boolean symmetrical;
-	Level world;
+	World world;
 
 	private final transient Map<BlockPos, BlockEntity> teCache = new HashMap<>();
 
@@ -74,35 +87,35 @@ public abstract class AbstractMultiblock implements IMultiblock, BlockAndTintGet
 	}
 
 	@Override
-	public ResourceLocation getID() {
+	public Identifier getID() {
 		return id;
 	}
 
 	@Override
-	public IMultiblock setId(ResourceLocation res) {
+	public IMultiblock setId(Identifier res) {
 		this.id = res;
 		return this;
 	}
 
 	@Override
-	public void place(Level world, BlockPos pos, Rotation rotation) {
+	public void place(World world, BlockPos pos, BlockRotation rotation) {
 		setWorld(world);
 		simulate(world, pos, rotation, false).getSecond().forEach(r -> {
 			BlockPos placePos = r.getWorldPosition();
-			BlockState targetState = r.getStateMatcher().getDisplayedState((int) world.getDayTime()).rotate(rotation);
+			BlockState targetState = r.getStateMatcher().getDisplayedState((int) world.getTimeOfDay()).rotate(rotation);
 
-			if (!targetState.isAir() && targetState.canSurvive(world, placePos) && world.getBlockState(placePos).getMaterial().isReplaceable()) {
-				world.setBlockAndUpdate(placePos, targetState);
+			if (!targetState.isAir() && targetState.canPlaceAt(world, placePos) && world.getBlockState(placePos).getMaterial().isReplaceable()) {
+				world.setBlockState(placePos, targetState);
 			}
 		});
 	}
 
 	@Override
-	public Rotation validate(Level world, BlockPos pos) {
-		if (isSymmetrical() && validate(world, pos, Rotation.NONE)) {
-			return Rotation.NONE;
+	public BlockRotation validate(World world, BlockPos pos) {
+		if (isSymmetrical() && validate(world, pos, BlockRotation.NONE)) {
+			return BlockRotation.NONE;
 		} else {
-			for (Rotation rot : Rotation.values()) {
+			for (BlockRotation rot : BlockRotation.values()) {
 				if (validate(world, pos, rot)) {
 					return rot;
 				}
@@ -112,7 +125,7 @@ public abstract class AbstractMultiblock implements IMultiblock, BlockAndTintGet
 	}
 
 	@Override
-	public boolean validate(Level world, BlockPos pos, Rotation rotation) {
+	public boolean validate(World world, BlockPos pos, BlockRotation rotation) {
 		setWorld(world);
 		Pair<BlockPos, Collection<SimulateResult>> sim = simulate(world, pos, rotation, false);
 
@@ -130,7 +143,7 @@ public abstract class AbstractMultiblock implements IMultiblock, BlockAndTintGet
 		return symmetrical;
 	}
 
-	public void setWorld(Level world) {
+	public void setWorld(World world) {
 		this.world = world;
 	}
 
@@ -146,7 +159,7 @@ public abstract class AbstractMultiblock implements IMultiblock, BlockAndTintGet
 
 	@Override
 	public FluidState getFluidState(BlockPos pos) {
-		return Fluids.EMPTY.defaultFluidState();
+		return Fluids.EMPTY.getDefaultState();
 	}
 
 	@Override
@@ -168,7 +181,7 @@ public abstract class AbstractMultiblock implements IMultiblock, BlockAndTintGet
 	}
 
 	@Override
-	public int getBrightness(LightLayer type, BlockPos pos) {
+	public int getBrightness(LightType type, BlockPos pos) {
 		return 15;
 	}
 

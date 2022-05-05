@@ -1,14 +1,11 @@
 package vazkii.patchouli.client.book.text;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-
-import net.minecraft.client.gui.Font;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextColor;
-
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.HoverEvent;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
 import vazkii.patchouli.client.book.gui.GuiBook;
 import vazkii.patchouli.common.book.Book;
 
@@ -22,12 +19,12 @@ import java.util.function.Supplier;
 public class Word {
 	private final Book book;
 	private final GuiBook gui;
-	private final Component text;
+	private final Text text;
 	private final List<Word> linkCluster;
 	private final Supplier<Boolean> onClick;
 	public final int x, y, width, height;
 
-	public Word(GuiBook gui, Span span, MutableComponent text, int x, int y, int strWidth, List<Word> cluster) {
+	public Word(GuiBook gui, Span span, MutableText text, int x, int y, int strWidth, List<Word> cluster) {
 		this.book = gui.book;
 		this.gui = gui;
 		this.x = x;
@@ -37,22 +34,22 @@ public class Word {
 		this.onClick = span.onClick;
 		this.linkCluster = cluster;
 		if (!span.tooltip.getString().isEmpty()) {
-			text = text.withStyle(s -> s.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, span.tooltip)));
+			text = text.setStyle(Style.EMPTY.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, span.tooltip)));
 		}
 		this.text = text;
 	}
 
-	public void render(PoseStack ms, Font font, Style styleOverride, int mouseX, int mouseY) {
-		MutableComponent toRender = text.copy().withStyle(styleOverride);
+	public void render(MatrixStack ms, TextRenderer textRenderer, Style styleOverride, int mouseX, int mouseY) {
+		MutableText toRender = text.copy().setStyle(styleOverride);
 		if (isClusterHovered(mouseX, mouseY)) {
 			if (onClick != null) {
-				toRender.withStyle(s -> s.withColor(TextColor.fromRgb(book.linkHoverColor)));
+				toRender.setStyle(Style.EMPTY.withColor(book.linkHoverColor));
 			}
 
-			gui.renderComponentHoverEffect(ms, text.getStyle(), (int) gui.getRelativeX(mouseX), (int) gui.getRelativeY(mouseY));
+			gui.renderTextHoverEffect(ms, text.getStyle(), (int) gui.getRelativeX(mouseX), (int) gui.getRelativeY(mouseY));
 		}
 
-		font.draw(ms, toRender, x, y, -1);
+		textRenderer.draw(ms, toRender, x, y, -1);
 	}
 
 	public boolean click(double mouseX, double mouseY, int mouseButton) {

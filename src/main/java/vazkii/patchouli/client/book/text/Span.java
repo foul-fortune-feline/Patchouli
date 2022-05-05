@@ -1,10 +1,10 @@
 package vazkii.patchouli.client.book.text;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.text.LiteralTextContent;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -16,13 +16,13 @@ import java.util.function.Supplier;
  */
 public class Span {
 	public static Span error(SpanState state, String message) {
-		return new Span(state, message, Style.EMPTY.withColor(ChatFormatting.RED));
+		return new Span(state, message, Style.EMPTY.withColor(Formatting.RED));
 	}
 
 	public final String text;
 	public final Style style;
 	public final List<Span> linkCluster;
-	public final Component tooltip;
+	public final Text tooltip;
 	public final Supplier<Boolean> onClick;
 	public final int lineBreaks;
 	public final int spacingLeft;
@@ -50,7 +50,7 @@ public class Span {
 		this.style = style;
 		this.onClick = null;
 		this.linkCluster = null;
-		this.tooltip = new TextComponent("");
+		this.tooltip = MutableText.of(new LiteralTextContent(""));
 		this.lineBreaks = state.lineBreaks;
 		this.spacingLeft = state.spacingLeft;
 		this.spacingRight = state.spacingRight;
@@ -61,11 +61,11 @@ public class Span {
 		state.spacingRight = 0;
 	}
 
-	public MutableComponent styledSubstring(int start) {
-		return new TextComponent(text.substring(start)).setStyle(style);
+	public MutableText styledSubstring(int start) {
+		return MutableText.of(new LiteralTextContent(text.substring(start))).setStyle(style);
 	}
 
-	public MutableComponent styledSubstring(int start, int end) {
-		return new TextComponent(text.substring(start, end)).setStyle(style);
+	public MutableText styledSubstring(int start, int end) {
+		return MutableText.of(new LiteralTextContent(text.substring(start, end))).setStyle(style);
 	}
 }

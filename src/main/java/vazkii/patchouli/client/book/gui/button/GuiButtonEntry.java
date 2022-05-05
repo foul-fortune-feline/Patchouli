@@ -1,7 +1,7 @@
 package vazkii.patchouli.client.book.gui.button;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.MatrixStack;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -30,7 +30,7 @@ public class GuiButtonEntry extends Button {
 	}
 
 	@Override
-	public void renderButton(PoseStack ms, int mouseX, int mouseY, float partialTicks) {
+	public void renderButton(MatrixStack ms, int mouseX, int mouseY, float partialTicks) {
 		if (active) {
 			if (isHoveredOrFocused()) {
 				timeHovered = Math.min(ANIM_TIME, timeHovered + ClientTicker.delta);

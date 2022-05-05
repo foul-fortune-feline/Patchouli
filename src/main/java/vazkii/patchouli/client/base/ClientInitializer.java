@@ -5,14 +5,13 @@ import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.client.model.FabricModelPredicateProviderRegistry;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.ModelBakery;
-import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.resources.ResourceManager;
-
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.model.BakedModel;
+import net.minecraft.client.render.model.ModelLoader;
+import net.minecraft.client.util.ModelIdentifier;
+import net.minecraft.resource.ResourceManager;
+import net.minecraft.resource.ResourceType;
+import net.minecraft.util.Identifier;
 import vazkii.patchouli.client.book.ClientBookRegistry;
 import vazkii.patchouli.client.handler.BookRightClickHandler;
 import vazkii.patchouli.client.handler.MultiblockVisualizationHandler;
@@ -35,24 +34,24 @@ public class ClientInitializer implements ClientModInitializer {
 		NetworkHandler.registerMessages();
 
 		ModelLoadingRegistry.INSTANCE.registerModelProvider((manager, register) -> BookRegistry.INSTANCE.books.values().stream()
-				.map(b -> new ModelResourceLocation(b.model, "inventory"))
+				.map(b -> new ModelIdentifier(b.model, "inventory"))
 				.forEach(register));
 
 		FabricModelPredicateProviderRegistry.register(PatchouliItems.BOOK,
-				new ResourceLocation(Patchouli.MOD_ID, "completion"),
+				new Identifier(Patchouli.MOD_ID, "completion"),
 				(stack, world, entity, seed) -> ItemModBook.getCompletion(stack));
 
-		ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new SimpleSynchronousResourceReloadListener() {
-			private final ResourceLocation id = new ResourceLocation(Patchouli.MOD_ID, "resource_pack_books");
+		ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new SimpleSynchronousResourceReloadListener() {
+			private final Identifier id = new Identifier(Patchouli.MOD_ID, "resource_pack_books");
 
 			@Override
-			public ResourceLocation getFabricId() {
+			public Identifier getFabricId() {
 				return id;
 			}
 
 			@Override
-			public void onResourceManagerReload(ResourceManager manager) {
-				if (Minecraft.getInstance().level != null) {
+			public void reload(ResourceManager manager) {
+				if (MinecraftClient.getInstance().world != null) {
 					Patchouli.LOGGER.info("Reloading resource pack-based books, world is nonnull");
 					ClientBookRegistry.INSTANCE.reload(true);
 				} else {
@@ -62,8 +61,8 @@ public class ClientInitializer implements ClientModInitializer {
 		});
 	}
 
-	public static void replaceBookModel(ModelBakery loader, Map<ResourceLocation, BakedModel> bakedRegistry) {
-		ModelResourceLocation key = new ModelResourceLocation(PatchouliItems.BOOK_ID, "inventory");
+	public static void replaceBookModel(ModelLoader loader, Map<Identifier, BakedModel> bakedRegistry) {
+		ModelIdentifier key = new ModelIdentifier(PatchouliItems.BOOK_ID, "inventory");
 		BakedModel oldModel = bakedRegistry.get(key);
 		if (oldModel != null) {
 			bakedRegistry.put(key, new BookModel(oldModel, loader));

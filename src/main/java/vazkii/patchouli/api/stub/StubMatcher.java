@@ -1,6 +1,9 @@
 package vazkii.patchouli.api.stub;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -12,7 +15,7 @@ public final class StubMatcher implements IStateMatcher {
 
 	public static final StubMatcher INSTANCE = new StubMatcher();
 
-	private final BlockState state = Blocks.AIR.defaultBlockState();
+	private final BlockState state = Blocks.AIR.getDefaultState();
 
 	private StubMatcher() {}
 

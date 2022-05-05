@@ -1,17 +1,17 @@
 package vazkii.patchouli.client.book.gui;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.item.ItemStack;
+import net.minecraft.recipe.Ingredient;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
-
+import net.minecraft.text.LiteralTextContent;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import vazkii.patchouli.api.IComponentRenderContext;
 import vazkii.patchouli.client.RenderHelper;
 import vazkii.patchouli.client.base.PersistentData;
@@ -34,7 +34,7 @@ public class GuiBookEntry extends GuiBook implements IComponentRenderContext {
 	final BookEntry entry;
 	BookPage leftPage, rightPage;
 
-	final Map<Button, Runnable> customButtons = new HashMap<>();
+	final Map<ButtonWidget, Runnable> customButtons = new HashMap<>();
 
 	public GuiBookEntry(Book book, BookEntry entry) {
 		this(book, entry, 0);
@@ -89,7 +89,7 @@ public class GuiBookEntry extends GuiBook implements IComponentRenderContext {
 	}
 
 	@Override
-	void drawForegroundElements(PoseStack ms, int mouseX, int mouseY, float partialTicks) {
+	void drawForegroundElements(MatrixStack ms, int mouseX, int mouseY, float partialTicks) {
 		drawPage(ms, leftPage, mouseX, mouseY, partialTicks);
 		drawPage(ms, rightPage, mouseX, mouseY, partialTicks);
 
@@ -105,15 +105,15 @@ public class GuiBookEntry extends GuiBook implements IComponentRenderContext {
 				|| super.mouseClickedScaled(mouseX, mouseY, mouseButton);
 	}
 
-	void drawPage(PoseStack ms, BookPage page, int mouseX, int mouseY, float pticks) {
+	void drawPage(MatrixStack ms, BookPage page, int mouseX, int mouseY, float pticks) {
 		if (page == null) {
 			return;
 		}
 
-		ms.pushPose();
+		ms.push();
 		ms.translate(page.left, page.top, 0);
 		page.render(ms, mouseX - page.left, mouseY - page.top, pticks);
-		ms.popPose();
+		ms.pop();
 	}
 
 	boolean clickPage(BookPage page, double mouseX, double mouseY, int mouseButton) {
@@ -171,7 +171,7 @@ public class GuiBookEntry extends GuiBook implements IComponentRenderContext {
 
 	@Override
 	public boolean canBeOpened() {
-		return !entry.isLocked() && !equals(Minecraft.getInstance().screen);
+		return !entry.isLocked() && !equals(MinecraftClient.getInstance().currentScreen);
 	}
 
 	@Override
@@ -234,19 +234,19 @@ public class GuiBookEntry extends GuiBook implements IComponentRenderContext {
 	}
 
 	@Override
-	public Style getFont() {
+	public Style getStyle() {
 		return book.getFontStyle();
 	}
 
 	@Override
-	public void renderItemStack(PoseStack ms, int x, int y, int mouseX, int mouseY, ItemStack stack) {
+	public void renderItemStack(MatrixStack ms, int x, int y, int mouseX, int mouseY, ItemStack stack) {
 		if (stack.isEmpty()) {
 			return;
 		}
 
 		RenderHelper.transferMsToGl(ms, () -> {
-			Minecraft.getInstance().getItemRenderer().renderAndDecorateItem(stack, x, y);
-			minecraft.getItemRenderer().renderGuiItemDecorations(font, stack, x, y);
+			MinecraftClient.getInstance().getItemRenderer().renderInGui(stack, x, y);
+			MinecraftClient.getInstance().getItemRenderer().renderGuiItemOverlay(textRenderer, stack, x, y);
 		});
 
 		if (isMouseInRelativeRange(mouseX, mouseY, x, y, 16, 16)) {
@@ -255,8 +255,8 @@ public class GuiBookEntry extends GuiBook implements IComponentRenderContext {
 	}
 
 	@Override
-	public void renderIngredient(PoseStack ms, int x, int y, int mouseX, int mouseY, Ingredient ingr) {
-		ItemStack[] stacks = ingr.getItems();
+	public void renderIngredient(MatrixStack ms, int x, int y, int mouseX, int mouseY, Ingredient ingr) {
+		ItemStack[] stacks = ingr.getMatchingStacks();
 		if (stacks.length > 0) {
 			renderItemStack(ms, x, y, mouseX, mouseY, stacks[(ticksInBook / 20) % stacks.length]);
 		}
@@ -264,11 +264,11 @@ public class GuiBookEntry extends GuiBook implements IComponentRenderContext {
 
 	@Override
 	public void setHoverTooltip(List<String> tooltip) {
-		setTooltip(tooltip.stream().map(TextComponent::new).collect(Collectors.toList()));
+		setTooltip(tooltip.stream().map(LiteralTextContent::new).map(MutableText::of).collect(Collectors.toList()));
 	}
 
 	@Override
-	public void setHoverTooltipComponents(@Nonnull List<Component> tooltip) {
+	public void setHoverTooltipComponents(@Nonnull List<Text> tooltip) {
 		setTooltip(tooltip);
 	}
 
@@ -278,18 +278,18 @@ public class GuiBookEntry extends GuiBook implements IComponentRenderContext {
 	}
 
 	@Override
-	public void registerButton(Button button, int pageNum, Runnable onClick) {
+	public void registerButton(ButtonWidget button, int pageNum, Runnable onClick) {
 		button.x += bookLeft + ((pageNum % 2) == 0 ? LEFT_PAGE_X : RIGHT_PAGE_X);
 		button.y += bookTop;
 
 		customButtons.put(button, onClick);
-		addRenderableWidget(button);
+		addDrawableChild(button);
 	}
 
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (Minecraft.getInstance().options.keyInventory.matches(keyCode, scanCode)) {
-			this.onClose();
+		if (MinecraftClient.getInstance().options.inventoryKey.matchesKey(keyCode, scanCode)) {
+			this.close();
 			return true;
 		}
 		return super.keyPressed(keyCode, scanCode, modifiers);
@@ -301,12 +301,12 @@ public class GuiBookEntry extends GuiBook implements IComponentRenderContext {
 	}
 
 	@Override
-	public ResourceLocation getBookTexture() {
+	public Identifier getBookTexture() {
 		return book.bookTexture;
 	}
 
 	@Override
-	public ResourceLocation getCraftingTexture() {
+	public Identifier getCraftingTexture() {
 		return book.craftingTexture;
 	}
 

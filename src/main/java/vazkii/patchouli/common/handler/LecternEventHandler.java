@@ -1,7 +1,7 @@
 package vazkii.patchouli.common.handler;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.PlayerManager;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -31,7 +31,7 @@ public class LecternEventHandler {
 					Book book = ItemStackUtil.getBookFromStack(lectern.getBook());
 					if (book != null) {
 						if (!world.isClientSide) {
-							PatchouliAPI.get().openBookGUI((ServerPlayer) player, book.id);
+							PatchouliAPI.get().openBookGUI((PlayerManager) player, book.id);
 						}
 						return InteractionResult.SUCCESS;
 					}

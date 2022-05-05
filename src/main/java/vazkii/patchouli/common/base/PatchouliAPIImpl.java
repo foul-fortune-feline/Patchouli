@@ -4,12 +4,22 @@ import com.google.common.base.Preconditions;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.resources.Identifier;
+import net.minecraft.screen.Property;
+import net.minecraft.server.level.PlayerManager;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Rotation;
@@ -73,31 +83,31 @@ public class PatchouliAPIImpl implements IPatchouliAPI {
 	}
 
 	@Override
-	public void openBookGUI(ServerPlayer player, ResourceLocation book) {
+	public void openBookGUI(ServerPlayerEntity player, Identifier book) {
 		MessageOpenBookGui.send(player, book, null, 0);
 	}
 
 	@Override
-	public void openBookEntry(ServerPlayer player, ResourceLocation book, ResourceLocation entry, int page) {
+	public void openBookEntry(ServerPlayerEntity player, Identifier book, Identifier entry, int page) {
 		MessageOpenBookGui.send(player, book, entry, page);
 	}
 
 	@Override
-	public void openBookGUI(ResourceLocation book) {
+	public void openBookGUI(Identifier book) {
 		assertPhysicalClient();
 		ClientBookRegistry.INSTANCE.displayBookGui(book, null, 0);
 	}
 
 	@Override
-	public void openBookEntry(ResourceLocation book, ResourceLocation entry, int page) {
+	public void openBookEntry(Identifier book, Identifier entry, int page) {
 		assertPhysicalClient();
 		ClientBookRegistry.INSTANCE.displayBookGui(book, entry, page);
 	}
 
 	@Override
-	public ResourceLocation getOpenBookGui() {
+	public Identifier getOpenBookGui() {
 		assertPhysicalClient();
-		Screen gui = Minecraft.getInstance().screen;
+		Screen gui = MinecraftClient.getInstance().currentScreen;
 		if (gui instanceof GuiBook) {
 			return ((GuiBook) gui).book.id;
 		}
@@ -106,7 +116,7 @@ public class PatchouliAPIImpl implements IPatchouliAPI {
 
 	@Nonnull
 	@Override
-	public Component getSubtitle(@Nonnull ResourceLocation bookId) {
+	public Text getSubtitle(@Nonnull Identifier bookId) {
 		Book book = BookRegistry.INSTANCE.books.get(bookId);
 		if (book == null) {
 			throw new IllegalArgumentException("Book not found: " + bookId);
@@ -127,12 +137,12 @@ public class PatchouliAPIImpl implements IPatchouliAPI {
 	}
 
 	@Override
-	public ItemStack getBookStack(ResourceLocation book) {
+	public ItemStack getBookStack(Identifier book) {
 		return ItemModBook.forBook(book);
 	}
 
 	@Override
-	public void registerTemplateAsBuiltin(ResourceLocation res, Supplier<InputStream> streamProvider) {
+	public void registerTemplateAsBuiltin(Identifier res, Supplier<InputStream> streamProvider) {
 		assertPhysicalClient();
 		InputStream testStream = streamProvider.get();
 		if (testStream == null) {
@@ -152,12 +162,12 @@ public class PatchouliAPIImpl implements IPatchouliAPI {
 	}
 
 	@Override
-	public IMultiblock getMultiblock(ResourceLocation res) {
+	public IMultiblock getMultiblock(Identifier res) {
 		return MultiblockRegistry.MULTIBLOCKS.get(res);
 	}
 
 	@Override
-	public IMultiblock registerMultiblock(ResourceLocation res, IMultiblock mb) {
+	public IMultiblock registerMultiblock(Identifier res, IMultiblock mb) {
 		return MultiblockRegistry.registerMultiblock(res, mb);
 	}
 
@@ -168,7 +178,7 @@ public class PatchouliAPIImpl implements IPatchouliAPI {
 	}
 
 	@Override
-	public void showMultiblock(@Nonnull IMultiblock multiblock, @Nonnull Component displayName, @Nonnull BlockPos center, @Nonnull Rotation rotation) {
+	public void showMultiblock(@Nonnull IMultiblock multiblock, @Nonnull Text displayName, @Nonnull BlockPos center, @Nonnull Rotation rotation) {
 		assertPhysicalClient();
 		MultiblockVisualizationHandler.setMultiblock(multiblock, displayName, null, false);
 		MultiblockVisualizationHandler.anchorTo(center, rotation);
@@ -206,7 +216,7 @@ public class PatchouliAPIImpl implements IPatchouliAPI {
 	}
 
 	@Override
-	public IStateMatcher propertyMatcher(BlockState state, Property<?>... properties) {
+	public IStateMatcher propertyMatcher(BlockState state, Property... properties) {
 		return StateMatcher.fromStateWithFilter(state, Arrays.asList(properties)::contains);
 	}
 

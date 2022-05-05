@@ -4,7 +4,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.MatrixStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
@@ -90,7 +90,7 @@ public class MultiblockVisualizationHandler {
 		}
 	}
 
-	public static void onRenderHUD(PoseStack ms, float partialTicks) {
+	public static void onRenderHUD(MatrixStack ms, float partialTicks) {
 		if (hasMultiblock) {
 			int waitTime = 40;
 			int fadeOutSpeed = 4;
@@ -174,7 +174,7 @@ public class MultiblockVisualizationHandler {
 		}
 	}
 
-	public static void onWorldRenderLast(PoseStack ms) {
+	public static void onWorldRenderLast(MatrixStack ms) {
 		if (hasMultiblock && multiblock != null) {
 			renderMultiblock(Minecraft.getInstance().level, ms);
 		}
@@ -213,7 +213,7 @@ public class MultiblockVisualizationHandler {
 		HudRenderCallback.EVENT.register(MultiblockVisualizationHandler::onRenderHUD);
 	}
 
-	public static void renderMultiblock(Level world, PoseStack ms) {
+	public static void renderMultiblock(Level world, MatrixStack ms) {
 		Minecraft mc = Minecraft.getInstance();
 		if (!isAnchored) {
 			facingRotation = getRotation(mc.player);
@@ -286,7 +286,7 @@ public class MultiblockVisualizationHandler {
 		}
 	}
 
-	public static void renderBlock(Level world, BlockState state, BlockPos pos, float alpha, PoseStack ms) {
+	public static void renderBlock(Level world, BlockState state, BlockPos pos, float alpha, MatrixStack ms) {
 		if (pos != null) {
 			ms.pushPose();
 			ms.translate(pos.getX(), pos.getY(), pos.getZ());
@@ -322,7 +322,7 @@ public class MultiblockVisualizationHandler {
 		return offsetApplier.apply(pos);
 	}
 
-	private static void drawGradientRect(PoseStack ms, int left, int top, int right, int bottom, int startColor, int endColor) {
+	private static void drawGradientRect(MatrixStack ms, int left, int top, int right, int bottom, int startColor, int endColor) {
 		float f = (float) (startColor >> 24 & 255) / 255.0F;
 		float f1 = (float) (startColor >> 16 & 255) / 255.0F;
 		float f2 = (float) (startColor >> 8 & 255) / 255.0F;

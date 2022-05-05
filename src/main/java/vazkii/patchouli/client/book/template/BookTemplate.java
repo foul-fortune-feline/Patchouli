@@ -1,10 +1,8 @@
 package vazkii.patchouli.client.book.template;
 
 import com.google.gson.annotations.SerializedName;
-import com.mojang.blaze3d.vertex.PoseStack;
-
-import net.minecraft.resources.ResourceLocation;
-
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.Identifier;
 import vazkii.patchouli.api.IComponentProcessor;
 import vazkii.patchouli.api.IVariableProvider;
 import vazkii.patchouli.client.book.BookContentsBuilder;
@@ -16,7 +14,6 @@ import vazkii.patchouli.common.base.Patchouli;
 import vazkii.patchouli.common.book.Book;
 
 import javax.annotation.Nullable;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,18 +22,18 @@ import java.util.function.Supplier;
 
 public class BookTemplate {
 
-	public static final HashMap<ResourceLocation, Class<? extends TemplateComponent>> componentTypes = new HashMap<>();
+	public static final HashMap<Identifier, Class<? extends TemplateComponent>> componentTypes = new HashMap<>();
 
 	static {
-		registerComponent(new ResourceLocation(Patchouli.MOD_ID, "text"), ComponentText.class);
-		registerComponent(new ResourceLocation(Patchouli.MOD_ID, "item"), ComponentItemStack.class);
-		registerComponent(new ResourceLocation(Patchouli.MOD_ID, "image"), ComponentImage.class);
-		registerComponent(new ResourceLocation(Patchouli.MOD_ID, "header"), ComponentHeader.class);
-		registerComponent(new ResourceLocation(Patchouli.MOD_ID, "separator"), ComponentSeparator.class);
-		registerComponent(new ResourceLocation(Patchouli.MOD_ID, "frame"), ComponentFrame.class);
-		registerComponent(new ResourceLocation(Patchouli.MOD_ID, "entity"), ComponentEntity.class);
-		registerComponent(new ResourceLocation(Patchouli.MOD_ID, "tooltip"), ComponentTooltip.class);
-		registerComponent(new ResourceLocation(Patchouli.MOD_ID, "custom"), ComponentCustom.class);
+		registerComponent(new Identifier(Patchouli.MOD_ID, "text"), ComponentText.class);
+		registerComponent(new Identifier(Patchouli.MOD_ID, "item"), ComponentItemStack.class);
+		registerComponent(new Identifier(Patchouli.MOD_ID, "image"), ComponentImage.class);
+		registerComponent(new Identifier(Patchouli.MOD_ID, "header"), ComponentHeader.class);
+		registerComponent(new Identifier(Patchouli.MOD_ID, "separator"), ComponentSeparator.class);
+		registerComponent(new Identifier(Patchouli.MOD_ID, "frame"), ComponentFrame.class);
+		registerComponent(new Identifier(Patchouli.MOD_ID, "entity"), ComponentEntity.class);
+		registerComponent(new Identifier(Patchouli.MOD_ID, "tooltip"), ComponentTooltip.class);
+		registerComponent(new Identifier(Patchouli.MOD_ID, "custom"), ComponentCustom.class);
 	}
 
 	@SerializedName("include") List<TemplateInclusion> inclusions = new ArrayList<>();
@@ -57,11 +54,11 @@ public class BookTemplate {
 	transient boolean attemptedCreatingProcessor = false;
 
 	public static BookTemplate createTemplate(Book book, BookContentsBuilder builder, String type, @Nullable TemplateInclusion inclusion) {
-		ResourceLocation key;
+		Identifier key;
 		if (type.contains(":")) {
-			key = new ResourceLocation(type);
+			key = new Identifier(type);
 		} else {
-			key = new ResourceLocation(book.getModNamespace(), type);
+			key = new Identifier(book.getModNamespace(), type);
 		}
 
 		Supplier<BookTemplate> supplier = builder.getTemplate(key);
@@ -134,7 +131,7 @@ public class BookTemplate {
 		}
 	}
 
-	public void render(PoseStack ms, BookPage page, int mouseX, int mouseY, float pticks) {
+	public void render(MatrixStack ms, BookPage page, int mouseX, int mouseY, float pticks) {
 		if (compiled) {
 			components.forEach(c -> {
 				if (c.isVisible) {
@@ -156,7 +153,7 @@ public class BookTemplate {
 		return false;
 	}
 
-	public static void registerComponent(ResourceLocation name, Class<? extends TemplateComponent> clazz) {
+	public static void registerComponent(Identifier name, Class<? extends TemplateComponent> clazz) {
 		componentTypes.put(name, clazz);
 	}
 

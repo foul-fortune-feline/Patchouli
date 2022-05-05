@@ -1,10 +1,11 @@
 package vazkii.patchouli.client.book.gui.button;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
-
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableTextContent;
+import net.minecraft.util.Formatting;
 import vazkii.patchouli.client.base.PersistentData;
 import vazkii.patchouli.client.book.gui.GuiBook;
 
@@ -15,17 +16,18 @@ public class GuiButtonBookResize extends GuiButtonBook {
 
 	final boolean uiscale;
 
-	public GuiButtonBookResize(GuiBook parent, int x, int y, boolean uiscale, Button.OnPress onPress) {
+	public GuiButtonBookResize(GuiBook parent, int x, int y, boolean uiscale, ButtonWidget.PressAction onPress) {
 		super(parent, x, y, 330, 9, 11, 11, onPress,
-				new TranslatableComponent("patchouli.gui.lexicon.button.resize"));
+				MutableText.of(new TranslatableTextContent("patchouli.gui.lexicon.button.resize")));
 		this.uiscale = uiscale;
 	}
 
 	@Override
-	public List<Component> getTooltip() {
+	public List<Text> getTooltip() {
 		return !uiscale ? tooltip : Arrays.asList(
 				tooltip.get(0),
-				new TranslatableComponent("patchouli.gui.lexicon.button.resize.size" + PersistentData.data.bookGuiScale).withStyle(ChatFormatting.GRAY));
+				MutableText.of(new TranslatableTextContent("patchouli.gui.lexicon.button.resize.size" + PersistentData.data.bookGuiScale))
+						.setStyle(Style.EMPTY.withFormatting(Formatting.GRAY)));
 	}
 
 }

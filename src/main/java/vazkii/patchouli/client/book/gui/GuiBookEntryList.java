@@ -1,7 +1,7 @@
 package vazkii.patchouli.client.book.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.MatrixStack;
 
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -83,7 +83,7 @@ public abstract class GuiBookEntryList extends GuiBook {
 	}
 
 	@Override
-	void drawForegroundElements(PoseStack ms, int mouseX, int mouseY, float partialTicks) {
+	void drawForegroundElements(MatrixStack ms, int mouseX, int mouseY, float partialTicks) {
 		super.drawForegroundElements(ms, mouseX, mouseY, partialTicks);
 
 		if (spread == 0) {

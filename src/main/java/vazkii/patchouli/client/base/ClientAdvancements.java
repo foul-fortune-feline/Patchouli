@@ -1,7 +1,7 @@
 package vazkii.patchouli.client.base;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.MatrixStack;
 
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
@@ -81,7 +81,7 @@ public class ClientAdvancements {
 
 		@Nonnull
 		@Override
-		public Visibility render(PoseStack ms, ToastComponent toastGui, long delta) {
+		public Visibility render(MatrixStack ms, ToastComponent toastGui, long delta) {
 			RenderSystem.setShaderTexture(0, TEXTURE);
 
 			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);

@@ -1,7 +1,7 @@
 package vazkii.patchouli.client.book.template.component;
 
 import com.google.gson.annotations.SerializedName;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.MatrixStack;
 
 import net.minecraft.network.chat.Component;
 
@@ -45,7 +45,7 @@ public class ComponentTooltip extends TemplateComponent {
 	}
 
 	@Override
-	public void render(PoseStack ms, BookPage page, int mouseX, int mouseY, float pticks) {
+	public void render(MatrixStack ms, BookPage page, int mouseX, int mouseY, float pticks) {
 		if (page.parent.isMouseInRelativeRange(mouseX, mouseY, x, y, width, height)) {
 			page.parent.setTooltip(tooltip);
 		}

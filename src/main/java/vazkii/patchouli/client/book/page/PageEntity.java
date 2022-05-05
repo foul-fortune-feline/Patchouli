@@ -2,7 +2,7 @@ package vazkii.patchouli.client.book.page;
 
 import com.google.gson.annotations.SerializedName;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.MatrixStack;
 import com.mojang.math.Vector3f;
 
 import net.minecraft.client.Minecraft;
@@ -59,7 +59,7 @@ public class PageEntity extends PageWithText {
 	}
 
 	@Override
-	public void render(PoseStack ms, int mouseX, int mouseY, float pticks) {
+	public void render(MatrixStack ms, int mouseX, int mouseY, float pticks) {
 		int x = GuiBook.PAGE_WIDTH / 2 - 53;
 		int y = 7;
 		RenderSystem.enableBlend();
@@ -86,7 +86,7 @@ public class PageEntity extends PageWithText {
 		super.render(ms, mouseX, mouseY, pticks);
 	}
 
-	public static void renderEntity(PoseStack ms, Entity entity, Level world, float x, float y, float rotation, float renderScale, float offset) {
+	public static void renderEntity(MatrixStack ms, Entity entity, Level world, float x, float y, float rotation, float renderScale, float offset) {
 		entity.level = world;
 
 		ms.pushPose();

@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.text.Style;
+import net.minecraft.text.*;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 
@@ -110,6 +110,12 @@ public class Book {
 	public boolean i18n = false;
 
 	public Map<String, String> macros = new HashMap<>();
+
+
+
+
+
+
 
 	public void build(ModContainer owner, Identifier Identifier, boolean external) {
 		this.owner = owner;
@@ -217,21 +223,21 @@ public class Book {
 		}
 	}
 
-	public MutableComponent getSubtitle() {
-		Component editionStr;
+	public MutableText getSubtitle() {
+		Text editionStr;
 
 		try {
 			int ver = Integer.parseInt(version);
 			if (ver == 0) {
-				return new TranslatableComponent(subtitle);
+				return MutableText.of(new TranslatableTextContent(subtitle));
 			}
 
-			editionStr = new TextComponent(numberToOrdinal(ver));
+			editionStr = MutableText.of(new LiteralTextContent(numberToOrdinal(ver)));
 		} catch (NumberFormatException e) {
-			editionStr = new TranslatableComponent("patchouli.gui.lexicon.dev_edition");
+			editionStr = MutableText.of(new TranslatableTextContent("patchouli.gui.lexicon.dev_edition"));
 		}
 
-		return new TranslatableComponent("patchouli.gui.lexicon.edition_str", editionStr);
+		return MutableText.of(new TranslatableTextContent("patchouli.gui.lexicon.edition_str", editionStr));
 	}
 
 	public BookIcon getIcon() {

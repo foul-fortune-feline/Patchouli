@@ -8,7 +8,7 @@ import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.PlayerManager;
 
 import vazkii.patchouli.client.book.ClientBookRegistry;
 import vazkii.patchouli.common.base.Patchouli;
@@ -23,7 +23,7 @@ public class MessageReloadBookContents {
 		PlayerLookup.all(server).forEach(MessageReloadBookContents::send);
 	}
 
-	public static void send(ServerPlayer player) {
+	public static void send(PlayerManager player) {
 		FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.EMPTY_BUFFER);
 		ServerPlayNetworking.send(player, ID, buf);
 	}

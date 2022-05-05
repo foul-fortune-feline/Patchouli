@@ -2,13 +2,10 @@ package vazkii.patchouli.common.book;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
-import net.minecraft.resources.ResourceLocation;
-
+import net.minecraft.util.Identifier;
 import org.apache.commons.lang3.tuple.Pair;
-
 import vazkii.patchouli.client.book.ClientBookRegistry;
 import vazkii.patchouli.common.base.Patchouli;
 import vazkii.patchouli.common.base.PatchouliConfig;
@@ -29,9 +26,9 @@ public class BookRegistry {
 	public static final BookRegistry INSTANCE = new BookRegistry();
 	public static final String BOOKS_LOCATION = Patchouli.MOD_ID + "_books";
 
-	public final Map<ResourceLocation, Book> books = new HashMap<>();
+	public final Map<Identifier, Book> books = new HashMap<>();
 	public static final Gson GSON = new GsonBuilder()
-			.registerTypeAdapter(ResourceLocation.class, new ResourceLocation.Serializer())
+			.registerTypeAdapter(Identifier.class, new Identifier.Serializer())
 			.create();
 
 	private boolean loaded = false;
@@ -40,7 +37,7 @@ public class BookRegistry {
 
 	public void init() {
 		Collection<ModContainer> mods = FabricLoader.getInstance().getAllMods();
-		Map<Pair<ModContainer, ResourceLocation>, String> foundBooks = new HashMap<>();
+		Map<Pair<ModContainer, Identifier>, String> foundBooks = new HashMap<>();
 
 		mods.forEach(mod -> {
 			String id = mod.getMetadata().getId();
@@ -59,7 +56,7 @@ public class BookRegistry {
 							}
 
 							String assetPath = fileStr.substring(fileStr.indexOf("data/"));
-							ResourceLocation bookId = new ResourceLocation(id, bookName);
+							Identifier bookId = new Identifier(id, bookName);
 							foundBooks.put(Pair.of(mod, bookId), assetPath);
 						}
 
@@ -69,7 +66,7 @@ public class BookRegistry {
 
 		foundBooks.forEach((pair, file) -> {
 			ModContainer mod = pair.getLeft();
-			ResourceLocation res = pair.getRight();
+			Identifier res = pair.getRight();
 
 			try (InputStream stream = Files.newInputStream(mod.getPath(file))) {
 				loadBook(mod, res, stream, false);
@@ -106,7 +103,7 @@ public class BookRegistry {
 		}
 	}
 
-	public void loadBook(ModContainer mod, ResourceLocation res, InputStream stream,
+	public void loadBook(ModContainer mod, Identifier res, InputStream stream,
 			boolean external) {
 		Reader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
 		Book book = GSON.fromJson(reader, Book.class);

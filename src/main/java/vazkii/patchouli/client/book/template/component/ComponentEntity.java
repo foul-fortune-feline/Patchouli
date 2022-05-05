@@ -1,7 +1,7 @@
 package vazkii.patchouli.client.book.template.component;
 
 import com.google.gson.annotations.SerializedName;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.MatrixStack;
 
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.world.entity.Entity;
@@ -46,7 +46,7 @@ public class ComponentEntity extends TemplateComponent {
 	}
 
 	@Override
-	public void render(PoseStack ms, BookPage page, int mouseX, int mouseY, float pticks) {
+	public void render(MatrixStack ms, BookPage page, int mouseX, int mouseY, float pticks) {
 		if (errored) {
 			page.fontRenderer.drawShadow(ms, I18n.get("patchouli.gui.lexicon.loading_error"), x, y, 0xFF0000);
 		}

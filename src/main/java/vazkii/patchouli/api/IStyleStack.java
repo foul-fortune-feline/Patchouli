@@ -1,6 +1,6 @@
 package vazkii.patchouli.api;
 
-import net.minecraft.network.chat.Style;
+import net.minecraft.text.Style;
 
 import java.util.function.UnaryOperator;
 

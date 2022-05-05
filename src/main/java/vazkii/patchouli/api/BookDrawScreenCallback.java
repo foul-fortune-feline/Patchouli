@@ -1,11 +1,10 @@
 package vazkii.patchouli.api;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.Identifier;
 
 /**
  * This event is fired after any
@@ -22,5 +21,5 @@ public interface BookDrawScreenCallback {
 				}
 			});
 
-	void trigger(ResourceLocation book, Screen gui, int mouseX, int mouseY, float partialTicks, PoseStack ms);
+	void trigger(Identifier book, Screen gui, int mouseX, int mouseY, float partialTicks, MatrixStack ms);
 }

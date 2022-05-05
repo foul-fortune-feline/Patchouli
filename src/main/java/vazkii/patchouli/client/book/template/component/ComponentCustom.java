@@ -1,7 +1,7 @@
 package vazkii.patchouli.client.book.template.component;
 
 import com.google.gson.annotations.SerializedName;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.MatrixStack;
 
 import vazkii.patchouli.api.ICustomComponent;
 import vazkii.patchouli.api.IVariable;
@@ -38,7 +38,7 @@ public class ComponentCustom extends TemplateComponent {
 	}
 
 	@Override
-	public void render(PoseStack ms, BookPage page, int mouseX, int mouseY, float pticks) {
+	public void render(MatrixStack ms, BookPage page, int mouseX, int mouseY, float pticks) {
 		callbacks.render(ms, page.parent, pticks, mouseX, mouseY);
 	}
 

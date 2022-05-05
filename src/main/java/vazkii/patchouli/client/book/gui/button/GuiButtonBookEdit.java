@@ -1,17 +1,19 @@
 package vazkii.patchouli.client.book.gui.button;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.network.chat.TranslatableComponent;
-
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
+import net.minecraft.text.TranslatableTextContent;
+import net.minecraft.util.Formatting;
 import vazkii.patchouli.client.book.gui.GuiBook;
 
 public class GuiButtonBookEdit extends GuiButtonBook {
 
-	public GuiButtonBookEdit(GuiBook parent, int x, int y, Button.OnPress onPress) {
+	public GuiButtonBookEdit(GuiBook parent, int x, int y, ButtonWidget.PressAction onPress) {
 		super(parent, x, y, 308, 9, 11, 11, onPress,
-				new TranslatableComponent("patchouli.gui.lexicon.button.editor"),
-				new TranslatableComponent("patchouli.gui.lexicon.button.editor.info").withStyle(ChatFormatting.GRAY));
+				MutableText.of(new TranslatableTextContent("patchouli.gui.lexicon.button.editor")),
+				MutableText.of(new TranslatableTextContent("patchouli.gui.lexicon.button.editor.info"))
+						.setStyle(Style.EMPTY.withFormatting(Formatting.GRAY)));
 	}
 
 }

@@ -2,8 +2,7 @@ package vazkii.patchouli.client.book.template;
 
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
-import com.mojang.blaze3d.vertex.PoseStack;
-
+import net.minecraft.client.util.math.MatrixStack;
 import vazkii.patchouli.api.IComponentProcessor;
 import vazkii.patchouli.api.IVariable;
 import vazkii.patchouli.api.IVariableProvider;
@@ -16,7 +15,6 @@ import vazkii.patchouli.client.book.gui.GuiBookEntry;
 import vazkii.patchouli.common.base.PatchouliConfig;
 
 import javax.annotation.Nullable;
-
 import java.util.function.UnaryOperator;
 
 public abstract class TemplateComponent implements IVariablesAvailableCallback {
@@ -79,7 +77,7 @@ public abstract class TemplateComponent implements IVariablesAvailableCallback {
 		// NO-OP
 	}
 
-	public void render(PoseStack ms, BookPage page, int mouseX, int mouseY, float pticks) {
+	public void render(MatrixStack ms, BookPage page, int mouseX, int mouseY, float pticks) {
 		// NO-OP
 	}
 

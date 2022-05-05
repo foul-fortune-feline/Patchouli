@@ -2,7 +2,7 @@ package vazkii.patchouli.client.book.template.component;
 
 import com.google.gson.annotations.SerializedName;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.MatrixStack;
 
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.world.item.ItemStack;
@@ -40,7 +40,7 @@ public class ComponentItemStack extends TemplateComponent {
 	}
 
 	@Override
-	public void render(PoseStack ms, BookPage page, int mouseX, int mouseY, float pticks) {
+	public void render(MatrixStack ms, BookPage page, int mouseX, int mouseY, float pticks) {
 		if (items.length == 0) {
 			return;
 		}

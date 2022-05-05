@@ -2,7 +2,7 @@ package vazkii.patchouli.client.book.page;
 
 import com.google.gson.annotations.SerializedName;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.MatrixStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
@@ -11,6 +11,7 @@ import com.mojang.math.Vector4f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
@@ -18,6 +19,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Identifier;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -48,14 +50,14 @@ public class PageMultiblock extends PageWithText {
 	private static final Random RAND = new Random();
 
 	String name = "";
-	@SerializedName("multiblock_id") ResourceLocation multiblockId;
+	@SerializedName("multiblock_id") Identifier multiblockId;
 
 	@SerializedName("multiblock") SerializedMultiblock serializedMultiblock;
 
 	@SerializedName("enable_visualize") boolean showVisualizeButton = true;
 
 	private transient AbstractMultiblock multiblockObj;
-	private transient Button visualizeButton;
+	private transient ButtonWidget visualizeButton;
 
 	@Override
 	public void build(BookEntry entry, BookContentsBuilder builder, int pageNum) {
@@ -92,7 +94,7 @@ public class PageMultiblock extends PageWithText {
 	}
 
 	@Override
-	public void render(PoseStack ms, int mouseX, int mouseY, float pticks) {
+	public void render(MatrixStack ms, int mouseX, int mouseY, float pticks) {
 		int x = GuiBook.PAGE_WIDTH / 2 - 53;
 		int y = 7;
 		RenderSystem.enableBlend();
@@ -108,7 +110,7 @@ public class PageMultiblock extends PageWithText {
 		super.render(ms, mouseX, mouseY, pticks);
 	}
 
-	public void handleButtonVisualize(Button button) {
+	public void handleButtonVisualize(ButtonWidget button) {
 		String entryKey = parent.getEntry().getId().toString();
 		Bookmark bookmark = new Bookmark(entryKey, pageNum / 2);
 		MultiblockVisualizationHandler.setMultiblock(multiblockObj, i18nText(name), bookmark, true);
@@ -120,7 +122,7 @@ public class PageMultiblock extends PageWithText {
 		}
 	}
 
-	private void renderMultiblock(PoseStack ms) {
+	private void renderMultiblock(MatrixStack ms) {
 		multiblockObj.setWorld(mc.level);
 		Vec3i size = multiblockObj.getSize();
 		int sizeX = size.getX();
@@ -175,7 +177,7 @@ public class PageMultiblock extends PageWithText {
 		ms.popPose();
 	}
 
-	private void renderElements(PoseStack ms, AbstractMultiblock mb, Iterable<? extends BlockPos> blocks, Vector4f eye) {
+	private void renderElements(MatrixStack ms, AbstractMultiblock mb, Iterable<? extends BlockPos> blocks, Vector4f eye) {
 		ms.pushPose();
 		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 		ms.translate(0, 0, -1);
@@ -189,7 +191,7 @@ public class PageMultiblock extends PageWithText {
 		ms.popPose();
 	}
 
-	private void doWorldRenderPass(PoseStack ms, AbstractMultiblock mb, Iterable<? extends BlockPos> blocks, final @Nonnull MultiBufferSource.BufferSource buffers, Vector4f eye) {
+	private void doWorldRenderPass(MatrixStack ms, AbstractMultiblock mb, Iterable<? extends BlockPos> blocks, final @Nonnull MultiBufferSource.BufferSource buffers, Vector4f eye) {
 		for (BlockPos pos : blocks) {
 			BlockState bs = mb.getBlockState(pos);
 			VertexConsumer buffer = buffers.getBuffer(ItemBlockRenderTypes.getChunkRenderType(bs));
@@ -204,7 +206,7 @@ public class PageMultiblock extends PageWithText {
 	// Hold errored TEs weakly, this may cause some dupe errors but will prevent spamming it every frame
 	private final transient Set<BlockEntity> erroredTiles = Collections.newSetFromMap(new WeakHashMap<>());
 
-	private void doTileEntityRenderPass(PoseStack ms, AbstractMultiblock mb, Iterable<? extends BlockPos> blocks, MultiBufferSource buffers, Vector4f eye) {
+	private void doTileEntityRenderPass(MatrixStack ms, AbstractMultiblock mb, Iterable<? extends BlockPos> blocks, MultiBufferSource buffers, Vector4f eye) {
 		for (BlockPos pos : blocks) {
 			BlockEntity te = mb.getBlockEntity(pos);
 			if (te != null && !erroredTiles.contains(te)) {

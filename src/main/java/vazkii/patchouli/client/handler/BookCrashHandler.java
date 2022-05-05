@@ -1,9 +1,8 @@
 package vazkii.patchouli.client.handler;
 
-import net.minecraft.SystemReport;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
-
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.util.crash.CrashReport;
 import vazkii.patchouli.client.book.gui.GuiBook;
 import vazkii.patchouli.client.book.gui.GuiBookEntry;
 import vazkii.patchouli.client.book.gui.GuiBookEntryList;
@@ -19,13 +18,13 @@ public class BookCrashHandler implements Supplier<String> {
 	private static final String INDENT = "\n\t\t";
 	private static final String LABEL = "Patchouli open book context";
 
-	public static void appendToCrashReport(SystemReport report) {
-		var mc = Minecraft.getInstance();
-		if (mc == null || !(mc.screen instanceof GuiBook)) {
+	public static void appendToCrashReport(CrashReport report) {
+		var mc = MinecraftClient.getInstance();
+		if (mc == null || !(mc.currentScreen instanceof GuiBook)) {
 			return;
 		}
 		try {
-			report.setDetail(LABEL, new BookCrashHandler());
+			report.addElement("detail").add(LABEL, new BookCrashHandler());
 		} catch (Exception e) {
 			Patchouli.LOGGER.fatal("Failed to extend crash report system info", e);
 		}
@@ -33,7 +32,7 @@ public class BookCrashHandler implements Supplier<String> {
 
 	@Override
 	public String get() {
-		Screen screen = Minecraft.getInstance().screen;
+		Screen screen = MinecraftClient.getInstance().currentScreen;
 		if (!(screen instanceof GuiBook gui)) {
 			return "n/a";
 		}

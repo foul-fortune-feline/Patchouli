@@ -1,26 +1,25 @@
 package vazkii.patchouli.client.book;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
-
-import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
-
+import net.minecraft.client.gui.Drawable;
+import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.Identifier;
 import vazkii.patchouli.client.RenderHelper;
 import vazkii.patchouli.common.base.Patchouli;
 import vazkii.patchouli.common.util.ItemStackUtil;
 
-public class BookIcon {
+public class BookIcon implements Drawable {
 	private static final BookIcon EMPTY = new BookIcon(ItemStack.EMPTY);
 
 	private final IconType type;
 	private final ItemStack stack;
-	private final ResourceLocation res;
+	private final Identifier res;
 
 	public static BookIcon from(String str) {
 		if (str.endsWith(".png")) {
-			return new BookIcon(new ResourceLocation(str));
+			return new BookIcon(new Identifier(str));
 		} else {
 			try {
 				ItemStack stack = ItemStackUtil.loadStackFromString(str);
@@ -38,13 +37,13 @@ public class BookIcon {
 		res = null;
 	}
 
-	public BookIcon(ResourceLocation res) {
+	public BookIcon(Identifier res) {
 		type = IconType.RESOURCE;
 		stack = null;
 		this.res = res;
 	}
 
-	public void render(PoseStack ms, int x, int y) {
+	public void render(MatrixStack ms, int x, int y, float delta) {
 		switch (type) {
 		case STACK:
 			RenderHelper.renderItemStackInGui(ms, stack, x, y);
@@ -53,7 +52,7 @@ public class BookIcon {
 		case RESOURCE:
 			RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 			RenderSystem.setShaderTexture(0, res);
-			GuiComponent.blit(ms, x, y, 0, 0, 16, 16, 16, 16);
+			DrawableHelper.drawTexture(ms, x, y, 0, 0, 16, 16, 16, 16);
 			break;
 		}
 	}

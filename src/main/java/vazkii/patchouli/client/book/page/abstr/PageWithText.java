@@ -1,6 +1,6 @@
 package vazkii.patchouli.client.book.page.abstr;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.MatrixStack;
 
 import net.minecraft.network.chat.Component;
 
@@ -29,7 +29,7 @@ public abstract class PageWithText extends BookPage {
 	public abstract int getTextHeight();
 
 	@Override
-	public void render(PoseStack ms, int mouseX, int mouseY, float pticks) {
+	public void render(MatrixStack ms, int mouseX, int mouseY, float pticks) {
 		if (shouldRenderText()) {
 			textRender.render(ms, mouseX, mouseY);
 		}

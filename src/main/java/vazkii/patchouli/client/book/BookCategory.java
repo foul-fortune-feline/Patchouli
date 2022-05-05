@@ -2,12 +2,11 @@ package vazkii.patchouli.client.book;
 
 import com.google.common.collect.Streams;
 import com.google.gson.annotations.SerializedName;
-
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
-
+import net.minecraft.text.LiteralTextContent;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableTextContent;
+import net.minecraft.util.Identifier;
 import vazkii.patchouli.common.base.PatchouliConfig;
 import vazkii.patchouli.common.book.Book;
 
@@ -28,12 +27,12 @@ public class BookCategory extends AbstractReadStateHolder implements Comparable<
 	private transient List<BookEntry> entries = new ArrayList<>();
 	private transient boolean locked;
 	private transient BookIcon icon = null;
-	private transient ResourceLocation id;
+	private transient Identifier id;
 
 	private transient boolean built;
 
-	public Component getName() {
-		return book.i18n ? new TranslatableComponent(name) : new TextComponent(name);
+	public Text getName() {
+		return book.i18n ? MutableText.of(new TranslatableTextContent(name)) : MutableText.of(new LiteralTextContent(name));
 	}
 
 	public String getDescription() {
@@ -111,7 +110,7 @@ public class BookCategory extends AbstractReadStateHolder implements Comparable<
 		return parent == null || parent.isEmpty();
 	}
 
-	public ResourceLocation getId() {
+	public Identifier getId() {
 		return id;
 	}
 
@@ -141,7 +140,7 @@ public class BookCategory extends AbstractReadStateHolder implements Comparable<
 		}
 	}
 
-	public void build(ResourceLocation id, BookContentsBuilder builder) {
+	public void build(Identifier id, BookContentsBuilder builder) {
 		if (built) {
 			return;
 		}
@@ -150,7 +149,7 @@ public class BookCategory extends AbstractReadStateHolder implements Comparable<
 
 		if (!isRootCategory()) {
 			if (parent.contains(":")) {
-				parentCategory = builder.getCategory(new ResourceLocation(parent));
+				parentCategory = builder.getCategory(new Identifier(parent));
 			} else {
 				String hint = String.format("`%s:%s`", book.getModNamespace(), parent);
 				throw new IllegalArgumentException("`parent` must be fully qualified (domain:name). Hint: Try " + hint);

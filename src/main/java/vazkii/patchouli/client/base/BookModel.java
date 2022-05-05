@@ -1,46 +1,44 @@
 package vazkii.patchouli.client.base;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.BlockModel;
-import net.minecraft.client.renderer.block.model.ItemOverrides;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.ModelBakery;
-import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.core.Direction;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.state.BlockState;
-
+import net.minecraft.block.BlockState;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.model.BakedModel;
+import net.minecraft.client.render.model.BakedQuad;
+import net.minecraft.client.render.model.ModelLoader;
+import net.minecraft.client.render.model.json.JsonUnbakedModel;
+import net.minecraft.client.render.model.json.ModelOverrideList;
+import net.minecraft.client.render.model.json.ModelTransformation;
+import net.minecraft.client.texture.Sprite;
+import net.minecraft.client.util.ModelIdentifier;
+import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.random.AbstractRandom;
 import vazkii.patchouli.common.book.Book;
 import vazkii.patchouli.common.item.ItemModBook;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
 public class BookModel implements BakedModel {
 	private final BakedModel original;
-	private final ItemOverrides itemHandler;
+	private final ModelOverrideList itemHandler;
 
-	public BookModel(BakedModel original, ModelBakery loader) {
+	public BookModel(BakedModel original, ModelLoader loader) {
 		this.original = original;
-		BlockModel missing = (BlockModel) loader.getModel(ModelBakery.MISSING_MODEL_LOCATION);
+		JsonUnbakedModel missing = (JsonUnbakedModel) loader.getOrLoadModel(ModelLoader.MISSING_ID);
 
-		this.itemHandler = new ItemOverrides(loader, missing, id -> missing, Collections.emptyList()) {
+		this.itemHandler = new ModelOverrideList(loader, missing, id -> missing, Collections.emptyList()) {
 			@Override
-			public BakedModel resolve(@Nonnull BakedModel original, @Nonnull ItemStack stack,
-					@Nullable ClientLevel world, @Nullable LivingEntity entity, int seed) {
+			public BakedModel apply(@Nonnull BakedModel original, @Nonnull ItemStack stack,
+					@Nullable ClientWorld world, @Nullable LivingEntity entity, int seed) {
 				Book book = ItemModBook.getBook(stack);
 				if (book != null) {
-					ModelResourceLocation modelPath = new ModelResourceLocation(book.model, "inventory");
-					return Minecraft.getInstance().getModelManager().getModel(modelPath);
+					ModelIdentifier modelPath = new ModelIdentifier(book.model, "inventory");
+					return MinecraftClient.getInstance().getBakedModelManager().getModel(modelPath);
 				}
 				return original;
 			}
@@ -49,13 +47,13 @@ public class BookModel implements BakedModel {
 
 	@Nonnull
 	@Override
-	public ItemOverrides getOverrides() {
+	public ModelOverrideList getOverrides() {
 		return itemHandler;
 	}
 
 	@Nonnull
 	@Override
-	public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @Nonnull Random rand) {
+	public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, @Nonnull AbstractRandom rand) {
 		return original.getQuads(state, side, rand);
 	}
 
@@ -65,28 +63,27 @@ public class BookModel implements BakedModel {
 	}
 
 	@Override
-	public boolean isGui3d() {
-		return original.isGui3d();
+	public boolean hasDepth() {
+		return original.hasDepth();
 	}
 
 	@Override
-	public boolean usesBlockLight() {
-		return original.usesBlockLight();
+	public boolean isSideLit() {
+		return original.isSideLit();
 	}
 
 	@Override
-	public boolean isCustomRenderer() {
-		return original.isCustomRenderer();
-	}
-
-	@Nonnull
-	@Override
-	public TextureAtlasSprite getParticleIcon() {
-		return original.getParticleIcon();
+	public boolean isBuiltin() {
+		return original.isBuiltin();
 	}
 
 	@Override
-	public ItemTransforms getTransforms() {
-		return original.getTransforms();
+	public Sprite getParticleSprite() {
+		return original.getParticleSprite();
+	}
+
+	@Override
+	public ModelTransformation getTransformation() {
+		return original.getTransformation();
 	}
 }

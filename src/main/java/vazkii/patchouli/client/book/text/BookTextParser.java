@@ -1,14 +1,9 @@
 package vazkii.patchouli.client.book.text;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.KeyMapping;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextColor;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
-
+import net.minecraft.client.option.KeyBinding;
+import net.minecraft.text.*;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
 import vazkii.patchouli.client.book.BookEntry;
 import vazkii.patchouli.client.book.gui.GuiBook;
 import vazkii.patchouli.client.book.gui.GuiBookEntry;
@@ -16,13 +11,13 @@ import vazkii.patchouli.common.base.Patchouli;
 import vazkii.patchouli.common.book.Book;
 
 import javax.annotation.Nullable;
-
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class BookTextParser {
-	public static final TextComponent EMPTY_STRING_COMPONENT = new TextComponent("");
+	public static final MutableText EMPTY_STRING_COMPONENT = MutableText.of(new LiteralTextContent(""));
 	// A command lookup takes the body of a command $(...) and the current span state.
 	// If it understands the command, it can modify the span state and return Optional.of(command replacement).
 	// Otherwise, it just returns Optional.empty().
@@ -77,19 +72,19 @@ public class BookTextParser {
 		}, "/t");
 		register(state -> state.gui.getMinecraft().player.getName().getString(), "playername"); // TODO 1.16: dropped format codes
 		register(state -> {
-			state.modifyStyle(s -> s.applyFormat(ChatFormatting.OBFUSCATED));
+			state.modifyStyle(s -> s.withFormatting(Formatting.OBFUSCATED));
 			return "";
 		}, "k", "obf");
 		register(state -> {
-			state.modifyStyle(s -> s.applyFormat(ChatFormatting.BOLD));
+			state.modifyStyle(s -> s.withFormatting(Formatting.BOLD));
 			return "";
 		}, "l", "bold");
 		register(state -> {
-			state.modifyStyle(s -> s.applyFormat(ChatFormatting.STRIKETHROUGH));
+			state.modifyStyle(s -> s.withFormatting(Formatting.STRIKETHROUGH));
 			return "";
 		}, "m", "strike");
 		register(state -> {
-			state.modifyStyle(s -> s.applyFormat(ChatFormatting.ITALIC));
+			state.modifyStyle(s -> s.withFormatting(Formatting.ITALIC));
 			return "";
 		}, "o", "italic", "italics");
 		register(state -> {
@@ -102,14 +97,15 @@ public class BookTextParser {
 		}, "nocolor");
 
 		register((parameter, state) -> {
-			KeyMapping result = getKeybindKey(state, parameter);
+			KeyBinding result = getKeybindKey(state, parameter);
 			if (result == null) {
-				state.tooltip = new TranslatableComponent("patchouli.gui.lexicon.keybind_missing", parameter);
+				state.tooltip = MutableText.of(new TranslatableTextContent("patchouli.gui.lexicon.keybind_missing", parameter));
 				return "N/A";
 			}
 
-			state.tooltip = new TranslatableComponent("patchouli.gui.lexicon.keybind", new TranslatableComponent(result.getName()));
-			return result.getTranslatedKeyMessage().getString();
+			state.tooltip = MutableText.of(new TranslatableTextContent("patchouli.gui.lexicon.keybind",
+					MutableText.of(new TranslatableTextContent(result.getBoundKeyTranslationKey()))));
+			return result.getBoundKeyLocalizedText().getString();
 		}, "k");
 		register((parameter, state) -> {
 			state.cluster = new LinkedList<>();
@@ -119,7 +115,7 @@ public class BookTextParser {
 
 			if (isExternal) {
 				String url = parameter;
-				state.tooltip = new TranslatableComponent("patchouli.gui.lexicon.external_link");
+				state.tooltip = MutableText.of(new TranslatableTextContent("patchouli.gui.lexicon.external_link"));
 				state.isExternalLink = true;
 				state.onClick = () -> {
 					GuiBook.openWebLink(url);
@@ -133,11 +129,12 @@ public class BookTextParser {
 					parameter = parameter.substring(0, hash);
 				}
 
-				ResourceLocation href = parameter.contains(":") ? new ResourceLocation(parameter) : new ResourceLocation(state.book.getModNamespace(), parameter);
+				Identifier href = parameter.contains(":") ? new Identifier(parameter) : new Identifier(state.book.getModNamespace(), parameter);
 				BookEntry entry = state.book.getContents().entries.get(href);
 				if (entry != null) {
 					state.tooltip = entry.isLocked()
-							? new TranslatableComponent("patchouli.gui.lexicon.locked").withStyle(ChatFormatting.GRAY)
+							? MutableText.of(new TranslatableTextContent("patchouli.gui.lexicon.locked"))
+							.setStyle(Style.EMPTY.withFormatting(Formatting.GRAY))
 							: entry.getName();
 					GuiBook gui = state.gui;
 					Book book = state.book;
@@ -158,13 +155,13 @@ public class BookTextParser {
 						return true;
 					};
 				} else {
-					state.tooltip = new TextComponent("BAD LINK: " + parameter);
+					state.tooltip = MutableText.of(new LiteralTextContent("BAD LINK: " + parameter));
 				}
 			}
 			return "";
 		}, "l");
 		register((parameter, state) -> {
-			state.tooltip = new TextComponent(parameter);
+			state.tooltip = MutableText.of(new LiteralTextContent(parameter));
 			state.cluster = new LinkedList<>();
 			return "";
 		}, "tooltip", "t");
@@ -172,12 +169,12 @@ public class BookTextParser {
 			state.pushStyle(Style.EMPTY.withColor(TextColor.fromRgb(state.book.linkColor)));
 			state.cluster = new LinkedList<>();
 			if (!parameter.startsWith("/")) {
-				state.tooltip = new TextComponent("INVALID COMMAND (must begin with /)");
+				state.tooltip = MutableText.of(new LiteralTextContent("INVALID COMMAND (must begin with /)"));
 			} else {
-				state.tooltip = new TextComponent(parameter.length() < 20 ? parameter : parameter.substring(0, 20) + "...");
+				state.tooltip = MutableText.of(new LiteralTextContent(parameter.length() < 20 ? parameter : parameter.substring(0, 20) + "..."));
 			}
 			state.onClick = () -> {
-				state.gui.getMinecraft().player.chat(parameter);
+				state.gui.getMinecraft().player.sendChatMessage(parameter);
 				return true;
 			};
 			return "";
@@ -207,10 +204,10 @@ public class BookTextParser {
 		this.baseStyle = baseStyle;
 	}
 
-	public List<Span> parse(Component text) {
+	public List<Span> parse(Text text) {
 		List<Span> spans = new ArrayList<>();
 		SpanState state = new SpanState(gui, book, baseStyle);
-		text.visitSelf((style, string) -> {
+		text.visit((style, string) -> {
 			spans.addAll(processCommands(expandMacros(string), state, style));
 			return Optional.empty();
 		}, baseStyle);
@@ -292,7 +289,7 @@ public class BookTextParser {
 		String result = optResult.orElse("$(" + cmd + ")");
 
 		if (state.endingExternal) {
-			result += ChatFormatting.GRAY + "\u21AA";
+			result += Formatting.GRAY + "\u21AA";
 		}
 
 		return result;
@@ -300,7 +297,7 @@ public class BookTextParser {
 
 	private static Optional<String> colorCodeProcessor(String functionName, SpanState state) {
 		if (functionName.length() == 1 && functionName.matches("^[0123456789abcdef]$")) {
-			state.modifyStyle(s -> s.applyFormat(ChatFormatting.getByCode(functionName.charAt(0))));
+			state.modifyStyle(s -> s.withFormatting(Formatting.byCode(functionName.charAt(0))));
 			return Optional.of("");
 		}
 		return Optional.empty();
@@ -333,7 +330,7 @@ public class BookTextParser {
 			state.lineBreaks = 1;
 			state.spacingLeft = pad;
 			state.spacingRight = state.spaceWidth;
-			return Optional.of(ChatFormatting.BLACK.toString() + bullet);
+			return Optional.of(Formatting.BLACK.toString() + bullet);
 		}
 		return Optional.empty();
 	}
@@ -354,12 +351,12 @@ public class BookTextParser {
 		return Optional.ofNullable(COMMANDS.get(functionName)).map(c -> c.process(state));
 	}
 
-	private static KeyMapping getKeybindKey(SpanState state, String keybind) {
+	private static KeyBinding getKeybindKey(SpanState state, String keybind) {
 		String alt = "key." + keybind;
 
-		KeyMapping[] keys = state.gui.getMinecraft().options.keyMappings;
-		for (KeyMapping k : keys) {
-			String name = k.getName();
+		KeyBinding[] keys = state.gui.getMinecraft().options.allKeys;
+		for (KeyBinding k : keys) {
+			String name = k.getBoundKeyLocalizedText().getString();
 			if (name.equals(keybind) || name.equals(alt)) {
 				return k;
 			}

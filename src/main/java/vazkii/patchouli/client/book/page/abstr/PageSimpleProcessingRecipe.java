@@ -1,7 +1,7 @@
 package vazkii.patchouli.client.book.page.abstr;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.MatrixStack;
 
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.world.item.ItemStack;
@@ -17,7 +17,7 @@ public abstract class PageSimpleProcessingRecipe<T extends Recipe<?>> extends Pa
 	}
 
 	@Override
-	protected void drawRecipe(PoseStack ms, T recipe, int recipeX, int recipeY, int mouseX, int mouseY, boolean second) {
+	protected void drawRecipe(MatrixStack ms, T recipe, int recipeX, int recipeY, int mouseX, int mouseY, boolean second) {
 		RenderSystem.setShaderTexture(0, book.craftingTexture);
 		RenderSystem.enableBlend();
 		GuiComponent.blit(ms, recipeX, recipeY, 11, 71, 96, 24, 128, 256);

@@ -2,16 +2,13 @@ package vazkii.patchouli.client.book;
 
 import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.util.Pair;
-
-import net.minecraft.resources.ResourceLocation;
-
+import net.minecraft.util.Identifier;
 import vazkii.patchouli.client.book.template.BookTemplate;
 import vazkii.patchouli.common.book.Book;
 import vazkii.patchouli.common.book.BookRegistry;
 import vazkii.patchouli.common.util.ItemStackUtil;
 
 import javax.annotation.Nullable;
-
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -27,14 +24,14 @@ import java.util.stream.Collectors;
  */
 public class BookContentsBuilder {
 	public static final String DEFAULT_LANG = "en_us";
-	private final Map<ResourceLocation, BookCategory> categories = new HashMap<>();
-	private final Map<ResourceLocation, BookEntry> entries = new HashMap<>();
-	private final Map<ResourceLocation, Supplier<BookTemplate>> templates = new HashMap<>();
+	private final Map<Identifier, BookCategory> categories = new HashMap<>();
+	private final Map<Identifier, BookEntry> entries = new HashMap<>();
+	private final Map<Identifier, Supplier<BookTemplate>> templates = new HashMap<>();
 	private final Map<ItemStackUtil.StackWrapper, Pair<BookEntry, Integer>> recipeMappings = new HashMap<>();
 
 	private interface LoadFunc<T> {
 		@Nullable
-		T load(Book book, BookContentLoader loader, ResourceLocation id, ResourceLocation file);
+		T load(Book book, BookContentLoader loader, Identifier id, Identifier file);
 	}
 
 	public BookContentsBuilder() {
@@ -42,17 +39,17 @@ public class BookContentsBuilder {
 	}
 
 	@Nullable
-	public BookCategory getCategory(ResourceLocation id) {
+	public BookCategory getCategory(Identifier id) {
 		return categories.get(id);
 	}
 
 	@Nullable
-	public BookEntry getEntry(ResourceLocation id) {
+	public BookEntry getEntry(Identifier id) {
 		return entries.get(id);
 	}
 
 	@Nullable
-	public Supplier<BookTemplate> getTemplate(ResourceLocation id) {
+	public Supplier<BookTemplate> getTemplate(Identifier id) {
 		return templates.get(id);
 	}
 
@@ -97,19 +94,19 @@ public class BookContentsBuilder {
 		);
 	}
 
-	private <T> void load(Book book, String thing, LoadFunc<T> loader, Map<ResourceLocation, T> builder) {
+	private <T> void load(Book book, String thing, LoadFunc<T> loader, Map<Identifier, T> builder) {
 		BookContentLoader contentLoader = book.isExternal
 				? BookContentExternalLoader.INSTANCE
 				: book.useResourcePack
 						? BookContentResourceLoader.INSTANCE
 				: BookContentClasspathLoader.INSTANCE;
-		List<ResourceLocation> foundIds = new ArrayList<>();
+		List<Identifier> foundIds = new ArrayList<>();
 		contentLoader.findFiles(book, thing, foundIds);
 
-		for (ResourceLocation id : foundIds) {
+		for (Identifier id : foundIds) {
 			String filePath = String.format("%s/%s/%s/%s/%s.json",
 					BookRegistry.BOOKS_LOCATION, book.id.getPath(), DEFAULT_LANG, thing, id.getPath());
-			T value = loader.load(book, contentLoader, id, new ResourceLocation(id.getNamespace(), filePath));
+			T value = loader.load(book, contentLoader, id, new Identifier(id.getNamespace(), filePath));
 			if (value != null) {
 				builder.put(id, value);
 			}
@@ -117,7 +114,7 @@ public class BookContentsBuilder {
 	}
 
 	@Nullable
-	private static BookCategory loadCategory(Book book, BookContentLoader loader, ResourceLocation id, ResourceLocation file) {
+	private static BookCategory loadCategory(Book book, BookContentLoader loader, Identifier id, Identifier file) {
 		try (Reader stream = loadLocalizedJson(book, loader, file)) {
 			BookCategory category = ClientBookRegistry.INSTANCE.gson.fromJson(stream, BookCategory.class);
 			if (category == null) {
@@ -135,8 +132,8 @@ public class BookContentsBuilder {
 	}
 
 	@Nullable
-	private static BookEntry loadEntry(Book book, BookContentLoader loader, ResourceLocation id,
-			ResourceLocation file, Function<ResourceLocation, BookCategory> categories) {
+	private static BookEntry loadEntry(Book book, BookContentLoader loader, Identifier id,
+			Identifier file, Function<Identifier, BookCategory> categories) {
 		try (Reader stream = loadLocalizedJson(book, loader, file)) {
 			BookEntry entry = ClientBookRegistry.INSTANCE.gson.fromJson(stream, BookEntry.class);
 			if (entry == null) {
@@ -164,7 +161,7 @@ public class BookContentsBuilder {
 		return null;
 	}
 
-	private static Supplier<BookTemplate> loadTemplate(Book book, BookContentLoader loader, ResourceLocation key, ResourceLocation res) {
+	private static Supplier<BookTemplate> loadTemplate(Book book, BookContentLoader loader, Identifier key, Identifier res) {
 		String json;
 		try (BufferedReader stream = loadLocalizedJson(book, loader, res)) {
 			json = stream.lines().collect(Collectors.joining("\n"));
@@ -183,8 +180,8 @@ public class BookContentsBuilder {
 		return supplier;
 	}
 
-	private static BufferedReader loadLocalizedJson(Book book, BookContentLoader loader, ResourceLocation res) {
-		ResourceLocation localized = new ResourceLocation(res.getNamespace(),
+	private static BufferedReader loadLocalizedJson(Book book, BookContentLoader loader, Identifier res) {
+		Identifier localized = new Identifier(res.getNamespace(),
 				res.getPath().replaceAll(DEFAULT_LANG, ClientBookRegistry.INSTANCE.currentLang));
 
 		InputStream input = loader.loadJson(book, localized, res);

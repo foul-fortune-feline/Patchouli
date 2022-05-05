@@ -1,7 +1,7 @@
 package vazkii.patchouli.client.handler;
 
 import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.MatrixStack;
 import com.mojang.datafixers.util.Pair;
 
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
@@ -28,7 +28,7 @@ import vazkii.patchouli.common.util.ItemStackUtil;
 
 public class BookRightClickHandler {
 
-	private static void onRenderHUD(PoseStack ms, float partialTicks) {
+	private static void onRenderHUD(MatrixStack ms, float partialTicks) {
 		Minecraft mc = Minecraft.getInstance();
 		Player player = mc.player;
 		ItemStack bookStack = player.getMainHandItem();

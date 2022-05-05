@@ -3,11 +3,18 @@ package vazkii.patchouli.common.multiblock;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
+import net.fabricmc.fabric.impl.tag.convention.TagRegistration;
 import net.fabricmc.fabric.impl.tag.extension.TagDelegate;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.command.argument.BlockPredicateArgumentType;
+import net.minecraft.command.argument.BlockStateArgument;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.BlockPos;
+import net.minecraft.state.property.Property;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.Tag;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -66,7 +73,7 @@ public class StringStateMatcher {
 
 		private boolean checkProps(BlockState state) {
 			for (Entry<Property<?>, Comparable<?>> e : props.entrySet()) {
-				if (!state.getValue(e.getKey()).equals(e.getValue())) {
+				if (!state.get(e.getKey()).equals(e.getValue())) {
 					return false;
 				}
 			}
@@ -119,7 +126,7 @@ public class StringStateMatcher {
 
 		private boolean checkProps(BlockState state) {
 			for (Entry<String, String> entry : props.entrySet()) {
-				Property<?> prop = state.getBlock().getStateDefinition().getProperty(entry.getKey());
+				Property<?> prop = state.getBlock().getStateManager().getProperty(entry.getKey());
 				if (prop == null) {
 					return false;
 				}
@@ -129,7 +136,7 @@ public class StringStateMatcher {
 					return false;
 				}
 
-				if (!state.getValue(prop).equals(value)) {
+				if (!state.get(prop).equals(value)) {
 					return false;
 				}
 			}

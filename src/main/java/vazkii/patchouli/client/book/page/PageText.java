@@ -1,10 +1,8 @@
 package vazkii.patchouli.client.book.page;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.resources.ResourceLocation;
-
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.Identifier;
 import vazkii.patchouli.client.book.gui.GuiBook;
 import vazkii.patchouli.client.book.page.abstr.PageWithText;
 
@@ -26,7 +24,7 @@ public class PageText extends PageWithText {
 	}
 
 	@Override
-	public void render(PoseStack ms, int mouseX, int mouseY, float pticks) {
+	public void render(MatrixStack ms, int mouseX, int mouseY, float pticks) {
 		super.render(ms, mouseX, mouseY, pticks);
 
 		if (pageNum == 0) {
@@ -34,11 +32,11 @@ public class PageText extends PageWithText {
 			String smolText = "";
 
 			if (mc.options.advancedItemTooltips) {
-				ResourceLocation res = parent.getEntry().getId();
+				Identifier res = parent.getEntry().getId();
 				smolText = res.toString();
 			} else if (entry.isExtension()) {
 				String name = entry.getTrueProvider().getOwnerName();
-				smolText = I18n.get("patchouli.gui.lexicon.added_by", name);
+				smolText = I18n.translate("patchouli.gui.lexicon.added_by", name);
 			}
 
 			if (!smolText.isEmpty()) {
@@ -48,7 +46,8 @@ public class PageText extends PageWithText {
 				renderedSmol = true;
 			}
 
-			parent.drawCenteredStringNoShadow(ms, parent.getEntry().getName().getVisualOrderText(), GuiBook.PAGE_WIDTH / 2, renderedSmol ? -3 : 0, book.headerColor);
+			parent.drawCenteredStringNoShadow(ms, parent.getEntry().getName().getString(), GuiBook.PAGE_WIDTH / 2,
+					renderedSmol ? -3 : 0, book.headerColor);
 			GuiBook.drawSeparator(ms, book, 0, 12);
 		} else if (title != null && !title.isEmpty()) {
 			parent.drawCenteredStringNoShadow(ms, i18n(title), GuiBook.PAGE_WIDTH / 2, 0, book.headerColor);

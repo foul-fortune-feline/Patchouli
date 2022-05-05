@@ -2,18 +2,21 @@ package vazkii.patchouli.api;
 
 import com.google.common.base.Suppliers;
 
-import net.minecraft.core.BlockPos;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.data.client.VariantSettings;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.state.property.Property;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.level.block.state.properties.Property;
 
 import org.apache.logging.log4j.LogManager;
 
+import org.jetbrains.annotations.NotNull;
 import vazkii.patchouli.api.stub.StubPatchouliAPI;
 
 import javax.annotation.Nullable;
@@ -77,43 +80,43 @@ public class PatchouliAPI {
 		 * Sends a network message to the given player
 		 * to open the given book to the last page that was open, or the landing page otherwise.
 		 */
-		void openBookGUI(ServerPlayer player, ResourceLocation book);
+		void openBookGUI(ServerPlayerEntity player, Identifier book);
 
 		/**
 		 * Sends a network message to the given player
 		 * to open the book to the given entry
 		 */
-		void openBookEntry(ServerPlayer player, ResourceLocation book, ResourceLocation entry, int page);
+		void openBookEntry(ServerPlayerEntity player, Identifier book, Identifier entry, int page);
 
 		/**
-		 * Client version of {@link #openBookGUI(ServerPlayer, ResourceLocation)}.
+		 * Client version of {@link #openBookGUI(ServerPlayerEntity, Identifier)}.
 		 */
-		void openBookGUI(ResourceLocation book);
+		void openBookGUI(Identifier book);
 
 		/**
-		 * Client version of {@link #openBookEntry(ServerPlayer, ResourceLocation, ResourceLocation, int)}
+		 * Client version of {@link #openBookEntry(ServerPlayerEntity, Identifier, Identifier, int)}
 		 */
-		void openBookEntry(ResourceLocation book, ResourceLocation entry, int page);
+		void openBookEntry(Identifier book, Identifier entry, int page);
 
 		/**
 		 * Returns the book ID of the currently open book, if any. Only works clientside.
 		 */
 		@Nullable
-		ResourceLocation getOpenBookGui();
+		Identifier getOpenBookGui();
 
 		/**
 		 * Works on both sides.
-		 * 
-		 * @return                          The subtitle (edition string/what appears under the title in the landing
-		 *                                  page) of the book.
+		 *
+		 * @return The subtitle (edition string/what appears under the title in the landing
+		 * page) of the book.
 		 * @throws IllegalArgumentException if the book id given cannot be found
 		 */
-		Component getSubtitle(ResourceLocation bookId);
+		Text getSubtitle(Identifier bookId);
 
 		/**
 		 * Returns a book item with its NBT set to the book passed in. Works on both sides.
 		 */
-		ItemStack getBookStack(ResourceLocation book);
+		ItemStack getBookStack(Identifier book);
 
 		/**
 		 * Register a template you made as a built in template to be used with all books
@@ -121,7 +124,7 @@ public class PatchouliAPI {
 		 * reads a full json file, containing a template.
 		 * Only works on client.
 		 */
-		void registerTemplateAsBuiltin(ResourceLocation res, Supplier<InputStream> streamProvider);
+		void registerTemplateAsBuiltin(Identifier res, Supplier<InputStream> streamProvider);
 
 		/**
 		 * Register a Patchouli command, of the type $(cmdname).
@@ -150,13 +153,13 @@ public class PatchouliAPI {
 		 * Gets a multiblock by its ID, or null if none exists for it.
 		 */
 		@Nullable
-		IMultiblock getMultiblock(ResourceLocation id);
+		IMultiblock getMultiblock(Identifier id);
 
 		/**
 		 * Registers a multiblock given its resource location. This takes care of both registering it
 		 * and setting its resource location to the one passed.
 		 */
-		IMultiblock registerMultiblock(ResourceLocation id, IMultiblock mb);
+		IMultiblock registerMultiblock(Identifier id, IMultiblock mb);
 
 		/**
 		 * @return The multiblock currently being visualized in-world or null if no multiblock is visualized. Only works
@@ -175,7 +178,7 @@ public class PatchouliAPI {
 		 * @param center      Where to place the multiblock's center
 		 * @param rotation    Orientation to visualize
 		 */
-		void showMultiblock(IMultiblock multiblock, Component displayName, BlockPos center, Rotation rotation);
+		void showMultiblock(IMultiblock multiblock, Text displayName, BlockPos center, VariantSettings.Rotation rotation);
 
 		/**
 		 * Clears the currently visualized multiblock. Only works clientside.

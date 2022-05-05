@@ -2,13 +2,11 @@ package vazkii.patchouli.client.book;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.annotations.SerializedName;
-
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
-
+import net.minecraft.item.ItemStack;
+import net.minecraft.text.LiteralTextContent;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.TranslatableTextContent;
+import net.minecraft.util.Identifier;
 import vazkii.patchouli.client.base.ClientAdvancements;
 import vazkii.patchouli.client.base.PersistentData;
 import vazkii.patchouli.client.base.PersistentData.DataHolder.BookData;
@@ -44,7 +42,7 @@ public class BookEntry extends AbstractReadStateHolder implements Comparable<Boo
 
 	@SerializedName("extra_recipe_mappings") private Map<String, Integer> extraRecipeMappings;
 
-	private transient ResourceLocation id;
+	private transient Identifier id;
 	private transient Book book;
 	private transient Book trueProvider;
 	private transient BookCategory lcategory = null;
@@ -56,8 +54,8 @@ public class BookEntry extends AbstractReadStateHolder implements Comparable<Boo
 
 	private transient boolean built;
 
-	public MutableComponent getName() {
-		return book.i18n ? new TranslatableComponent(name) : new TextComponent(name);
+	public MutableText getName() {
+		return book.i18n ? MutableText.of(new TranslatableTextContent(name)) : MutableText.of(new LiteralTextContent(name));
 	}
 
 	public List<BookPage> getPages() {
@@ -92,10 +90,10 @@ public class BookEntry extends AbstractReadStateHolder implements Comparable<Boo
 		return icon;
 	}
 
-	public void initCategory(Function<ResourceLocation, BookCategory> categories) {
+	public void initCategory(Function<Identifier, BookCategory> categories) {
 		if (lcategory == null) {
 			if (category.contains(":")) { // full category ID
-				lcategory = categories.apply(new ResourceLocation(category));
+				lcategory = categories.apply(new Identifier(category));
 			} else {
 				String hint = String.format("`%s:%s`", book.getModNamespace(), category);
 				if (isExtension() && !trueProvider.getModNamespace().equals(book.getModNamespace())) {
@@ -148,7 +146,7 @@ public class BookEntry extends AbstractReadStateHolder implements Comparable<Boo
 		return entryColor;
 	}
 
-	public ResourceLocation getId() {
+	public Identifier getId() {
 		return id;
 	}
 
@@ -162,7 +160,7 @@ public class BookEntry extends AbstractReadStateHolder implements Comparable<Boo
 		}
 
 		for (StackWrapper wrapper : relevantStacks) {
-			if (wrapper.stack.getHoverName().getString().toLowerCase().contains(query)) {
+			if (wrapper.stack.toHoverableText().getString().toLowerCase().contains(query)) {
 				return true;
 			}
 		}
@@ -201,7 +199,7 @@ public class BookEntry extends AbstractReadStateHolder implements Comparable<Boo
 		}
 	}
 
-	public void setId(ResourceLocation id) {
+	public void setId(Identifier id) {
 		this.id = id;
 	}
 
