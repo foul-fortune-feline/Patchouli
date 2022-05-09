@@ -41,12 +41,14 @@ dependencies {
 	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.1'
 }
 
+version = "${project.minecraft_version}-${project.build_number}-FABRIC"
+
 processResources {
-	inputs.property "version", project.build_number
+	inputs.property "version", project.version
 	filteringCharset "UTF-8"
 
 	filesMatching("fabric.mod.json") {
-		expand "version": project.build_number
+		expand "version": project.version
 	}
 }
 
@@ -91,7 +93,9 @@ publishing {
 
 
 	repositories {
-
+		maven {
+			url = "https://maven.modmuss50.me/"
+		}
 	}
 }
 
