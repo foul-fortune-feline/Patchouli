@@ -1,11 +1,9 @@
 package vazkii.patchouli.client.book.template.variable;
 
 import com.google.gson.JsonElement;
-
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
-
+import net.minecraft.item.ItemStack;
+import net.minecraft.recipe.Ingredient;
+import net.minecraft.text.Text;
 import vazkii.patchouli.api.IVariable;
 import vazkii.patchouli.api.IVariableSerializer;
 import vazkii.patchouli.api.VariableHelper;
@@ -20,7 +18,7 @@ public class VariableHelperImpl implements VariableHelper {
 		registerSerializer(new ItemStackVariableSerializer(), ItemStack.class);
 		registerSerializer(new ItemStackArrayVariableSerializer(), ItemStack[].class);
 		registerSerializer(new IngredientVariableSerializer(), Ingredient.class);
-		registerSerializer(new TextComponentVariableSerializer(), Component.class);
+		registerSerializer(new TextComponentVariableSerializer(), Text.class);
 	}
 
 	public Map<Class<?>, IVariableSerializer<?>> serializers = new HashMap<>();

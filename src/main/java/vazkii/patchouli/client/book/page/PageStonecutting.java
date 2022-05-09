@@ -1,11 +1,10 @@
 package vazkii.patchouli.client.book.page;
 
-import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.item.crafting.StonecutterRecipe;
-
+import net.minecraft.recipe.RecipeType;
+import net.minecraft.recipe.StonecuttingRecipe;
 import vazkii.patchouli.client.book.page.abstr.PageSimpleProcessingRecipe;
 
-public class PageStonecutting extends PageSimpleProcessingRecipe<StonecutterRecipe> {
+public class PageStonecutting extends PageSimpleProcessingRecipe<StonecuttingRecipe> {
 
 	public PageStonecutting() {
 		super(RecipeType.STONECUTTING);

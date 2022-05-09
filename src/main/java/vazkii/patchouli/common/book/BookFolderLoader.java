@@ -2,9 +2,8 @@ package vazkii.patchouli.common.book;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
-import net.minecraft.ResourceLocationException;
-import net.minecraft.resources.ResourceLocation;
-
+import net.minecraft.util.Identifier;
+import net.minecraft.util.InvalidIdentifierException;
 import vazkii.patchouli.common.base.Patchouli;
 
 import java.io.File;
@@ -37,10 +36,10 @@ public class BookFolderLoader {
 		}
 
 		for (File dir : subdirs) {
-			ResourceLocation res;
+			Identifier res;
 			try {
-				res = new ResourceLocation(Patchouli.MOD_ID, dir.getName());
-			} catch (ResourceLocationException ex) {
+				res = new Identifier(Patchouli.MOD_ID, dir.getName());
+			} catch (InvalidIdentifierException ex) {
 				Patchouli.LOGGER.error("Invalid external book folder name {}, skipping", dir.getName(), ex);
 				continue;
 			}

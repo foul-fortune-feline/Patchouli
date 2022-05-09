@@ -9,40 +9,29 @@ import com.google.gson.JsonObject;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
-
-import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider;
-import net.fabricmc.fabric.impl.tag.convention.TagRegistration;
-import net.fabricmc.fabric.mixin.datagen.AbstractTagProviderMixin;
-import net.minecraft.data.server.ItemTagProvider;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtOps;
-
 import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.recipe.Ingredient;
-import net.minecraft.tag.*;
+import net.minecraft.tag.Tag;
+import net.minecraft.tag.TagKey;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
+import net.minecraft.util.registry.DynamicRegistryManager;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryKey;
-import net.minecraft.util.registry.SimpleRegistry;
+import net.minecraft.util.registry.RegistryEntry;
+import net.minecraft.util.registry.RegistryEntryList;
+import org.jetbrains.annotations.NotNull;
 import vazkii.patchouli.common.book.Book;
 import vazkii.patchouli.common.book.BookRegistry;
 import vazkii.patchouli.common.item.ItemModBook;
 
 import javax.annotation.Nullable;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.StringJoiner;
-
-import static vazkii.patchouli.common.base.Patchouli.MOD_ID;
+import java.util.*;
 
 public final class ItemStackUtil {
-	private static final Interner<Tag<Item>> INTERNER = Interners.newWeakInterner();
 	private static final Gson GSON = new GsonBuilder().create();
 
 	private ItemStackUtil() {}
@@ -128,20 +117,17 @@ public final class ItemStackUtil {
 		return joiner.toString();
 	}
 
-	public static List<ItemStack> loadStackListFromString(String ingredientString) {
+	public static @NotNull List<ItemStack> loadStackListFromString(String ingredientString) {
 		String[] stacksSerialized = splitStacksFromSerializedIngredient(ingredientString);
 		List<ItemStack> stacks = new ArrayList<>();
 		for (String s : stacksSerialized) {
 			if (s.startsWith("tag:")) {
-//				FabricTagProvider.ItemTagProvider.
-//				TagManagerLoader
-//				Tag<Item> tag = ItemTags.getAllTags().getTag(new ResourceLocation(s.substring(4)));
-//				Tag<Item> tag = Tag
-//				TagKey<Item> tag = TagKey.of(Registry.ITEM_KEY, new Identifier(MOD_ID, s.substring(4)));
-//				Tag<Item> tag = TagKey.of(Registry.ITEM_KEY, new Identifier(MOD)
+				RegistryEntryList.Named<Item> tag = DynamicRegistryManager.BUILTIN.get().get(Registry.ITEM_KEY)
+						.getOrCreateEntryList(TagKey.of(Registry.ITEM_KEY, new Identifier(s.substring(4))));
 				if (tag != null) {
-					for (Item item : tag.values()) {
-						stacks.add(new ItemStack(item));
+//					for (Item item : (Item[]) tag.stream().map(RegistryEntry::value).toArray()) {
+					for (RegistryEntry<Item> entry : tag.stream().toList()) {
+						stacks.add(new ItemStack(entry.value().asItem()));
 					}
 				}
 			} else {
@@ -150,23 +136,6 @@ public final class ItemStackUtil {
 		}
 		return stacks;
 	}
-
-//	public static List<ItemStack> loadStackListFromString(String ingredientString) {
-//		String[] stacksSerialized = splitStacksFromSerializedIngredient(ingredientString);
-//		List<ItemStack> stacks = new ArrayList<>();
-//		for (String s : stacksSerialized) {
-//			if (s.startsWith("tag:")) {
-//				if (tag != null) {
-//					for (Item item : tag.getValues()) {
-//						stacks.add(new ItemStack(item));
-//					}
-//				}
-//			} else {
-//				stacks.add(loadStackFromString(s));
-//			}
-//		}
-//		return stacks;
-//	}
 
 
 	public static StackWrapper wrapStack(ItemStack stack) {

@@ -2,25 +2,19 @@ package vazkii.patchouli.api.stub;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.data.client.VariantSettings;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.chat.Component;
-import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.state.property.Property;
 import net.minecraft.text.Text;
-import net.minecraft.text.TextColor;
+import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.level.block.state.properties.Property;
-
 import vazkii.patchouli.api.IMultiblock;
 import vazkii.patchouli.api.IStateMatcher;
 import vazkii.patchouli.api.IStyleStack;
 import vazkii.patchouli.api.PatchouliAPI.IPatchouliAPI;
 
 import javax.annotation.Nullable;
-
 import java.io.InputStream;
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -114,7 +108,7 @@ public class StubPatchouliAPI implements IPatchouliAPI {
 	}
 
 	@Override
-	public void showMultiblock(IMultiblock multiblock, Text displayName, BlockPos center, VariantSettings.Rotation rotation) {
+	public void showMultiblock(IMultiblock multiblock, Text displayName, BlockPos center, BlockRotation rotation) {
 
 	}
 

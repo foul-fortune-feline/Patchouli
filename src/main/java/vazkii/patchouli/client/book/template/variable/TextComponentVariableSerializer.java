@@ -1,27 +1,25 @@
 package vazkii.patchouli.client.book.template.variable;
 
 import com.google.gson.JsonElement;
-
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Component.Serializer;
-import net.minecraft.network.chat.TextComponent;
-
+import net.minecraft.text.LiteralTextContent;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import vazkii.patchouli.api.IVariableSerializer;
 
-public class TextComponentVariableSerializer implements IVariableSerializer<Component> {
+public class TextComponentVariableSerializer implements IVariableSerializer<Text> {
 	@Override
-	public Component fromJson(JsonElement json) {
+	public Text fromJson(JsonElement json) {
 		if (json.isJsonNull()) {
-			return new TextComponent("");
+			return MutableText.of(new LiteralTextContent(""));
 		}
 		if (json.isJsonPrimitive() && json.getAsJsonPrimitive().isString()) {
-			return new TextComponent(json.getAsString());
+			return MutableText.of(new LiteralTextContent(json.getAsString()));
 		}
-		return Serializer.fromJson(json);
+		return Text.Serializer.fromJson(json);
 	}
 
 	@Override
-	public JsonElement toJson(Component stack) {
-		return Serializer.toJsonTree(stack);
+	public JsonElement toJson(Text stack) {
+		return Text.Serializer.toJsonTree(stack);
 	}
 }

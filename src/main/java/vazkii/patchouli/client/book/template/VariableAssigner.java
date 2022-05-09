@@ -1,10 +1,8 @@
 package vazkii.patchouli.client.book.template;
 
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.world.item.ItemStack;
-
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.item.ItemStack;
 import org.apache.commons.lang3.text.WordUtils;
-
 import vazkii.patchouli.api.IComponentProcessor;
 import vazkii.patchouli.api.IVariable;
 import vazkii.patchouli.api.IVariableProvider;
@@ -12,7 +10,6 @@ import vazkii.patchouli.api.IVariablesAvailableCallback;
 import vazkii.patchouli.common.util.EntityUtil;
 
 import javax.annotation.Nullable;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -35,7 +32,7 @@ public class VariableAssigner {
 		FUNCTIONS.put("trim", wrapStringFunc(String::trim));
 		FUNCTIONS.put("capital", wrapStringFunc(WordUtils::capitalize));
 		FUNCTIONS.put("fcapital", wrapStringFunc(WordUtils::capitalizeFully));
-		FUNCTIONS.put("i18n", wrapStringFunc(I18n::get));
+		FUNCTIONS.put("i18n", wrapStringFunc(I18n::translate));
 		FUNCTIONS.put("exists", VariableAssigner::exists);
 		FUNCTIONS.put("iexists", VariableAssigner::iexists);
 		FUNCTIONS.put("inv", VariableAssigner::inv);
@@ -144,7 +141,7 @@ public class VariableAssigner {
 
 	private static IVariable iname(IVariable arg) {
 		ItemStack stack = arg.as(ItemStack.class);
-		return IVariable.wrap(stack.getHoverName().getString());
+		return IVariable.wrap(stack.toHoverableText().getString());
 	}
 
 	private static IVariable icount(IVariable arg) {

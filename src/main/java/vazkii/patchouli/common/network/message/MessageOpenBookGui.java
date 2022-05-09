@@ -6,7 +6,6 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import vazkii.patchouli.client.book.ClientBookRegistry;
@@ -19,18 +18,21 @@ public class MessageOpenBookGui {
 
 	public static void send(ServerPlayerEntity player, Identifier book, @Nullable Identifier entry, int page) {
 		PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
+
 		buf.writeIdentifier(book);
-		buf.writeIdentifier(entry);
+		buf.writeBoolean(entry != null);
+		if (entry != null) { buf.writeIdentifier(entry); }
+
 		buf.writeVarInt(page);
+
 		ServerPlayNetworking.send(player, ID, buf);
 	}
 
 	public static void handle(MinecraftClient client, ClientPlayPacketListener handler, PacketByteBuf buf, PacketSender responseSender) {
 		Identifier book = buf.readIdentifier();
-		Identifier entry = buf.readIdentifier();
+		Identifier entry = buf.readBoolean() ? buf.readIdentifier() : null;
 
 		int page = buf.readVarInt();
 		client.submit(() -> ClientBookRegistry.INSTANCE.displayBookGui(book, entry, page));
 	}
-
 }

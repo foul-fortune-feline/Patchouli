@@ -49,9 +49,9 @@ public class TextLayouter {
 
 	private TextRenderer textRenderer;
 
-	public void layout(TextRenderer font, List<Span> spans) {
+	public void layout(TextRenderer textRenderer, List<Span> spans) {
 		this.pageWidth = basePageWidth;
-		this.textRenderer = font;
+		this.textRenderer = textRenderer;
 
 		do {
 			y = pageY;
@@ -223,8 +223,8 @@ public class TextLayouter {
 				break;
 			}
 		}
-		for (int i = index - 1; i >= 0; i--) {
-			pending.remove(i);
+		if (index > 0) {
+			pending.subList(0, index).clear();
 		}
 
 		lineStart = textOffset;

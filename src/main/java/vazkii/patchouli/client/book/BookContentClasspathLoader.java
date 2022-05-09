@@ -1,11 +1,9 @@
 package vazkii.patchouli.client.book;
 
 import net.fabricmc.loader.api.ModContainer;
-import net.minecraft.resources.ResourceLocation;
-
+import net.minecraft.util.Identifier;
 import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.Nullable;
-
 import vazkii.patchouli.common.base.Patchouli;
 import vazkii.patchouli.common.book.Book;
 import vazkii.patchouli.common.book.BookRegistry;
@@ -22,13 +20,13 @@ public final class BookContentClasspathLoader implements BookContentLoader {
 
 	private BookContentClasspathLoader() {}
 
-	private BiFunction<Path, Path, Boolean> pred(String modId, List<ResourceLocation> list) {
+	private BiFunction<Path, Path, Boolean> pred(String modId, List<Identifier> list) {
 		return (root, file) -> {
 			Path rel = root.relativize(file);
 			String relName = rel.toString();
 			if (relName.endsWith(".json")) {
 				relName = FilenameUtils.removeExtension(FilenameUtils.separatorsToUnix(relName));
-				ResourceLocation res = new ResourceLocation(modId, relName);
+				Identifier res = new Identifier(modId, relName);
 				list.add(res);
 			}
 
@@ -37,7 +35,7 @@ public final class BookContentClasspathLoader implements BookContentLoader {
 	}
 
 	@Override
-	public void findFiles(Book book, String dir, List<ResourceLocation> list) {
+	public void findFiles(Book book, String dir, List<Identifier> list) {
 		ModContainer mod = book.owner;
 		String id = mod.getMetadata().getId();
 		BookRegistry.findFiles(mod, String.format("data/%s/%s/%s/%s/%s", id, BookRegistry.BOOKS_LOCATION, book.id.getPath(), BookContentsBuilder.DEFAULT_LANG, dir), path -> true, pred(id, list), false);
@@ -45,12 +43,12 @@ public final class BookContentClasspathLoader implements BookContentLoader {
 
 	@Nullable
 	@Override
-	public InputStream loadJson(Book book, ResourceLocation resloc, @Nullable ResourceLocation fallback) {
+	public InputStream loadJson(Book book, Identifier resloc, @Nullable Identifier fallback) {
 		String path = "data/" + resloc.getNamespace() + "/" + resloc.getPath();
 		Patchouli.LOGGER.debug("Loading {}", path);
 
 		try {
-			return Files.newInputStream(book.owner.getPath(path));
+			return Files.newInputStream(book.owner.findPath(path).orElseThrow());
 		} catch (IOException ex) {
 			if (fallback != null) {
 				return loadJson(book, fallback, null);

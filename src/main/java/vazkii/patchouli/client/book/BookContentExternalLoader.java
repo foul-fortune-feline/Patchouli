@@ -1,9 +1,7 @@
 package vazkii.patchouli.client.book;
 
-import net.minecraft.resources.ResourceLocation;
-
+import net.minecraft.util.Identifier;
 import org.apache.commons.io.FilenameUtils;
-
 import vazkii.patchouli.common.base.Patchouli;
 import vazkii.patchouli.common.book.Book;
 import vazkii.patchouli.common.book.BookFolderLoader;
@@ -20,7 +18,7 @@ public final class BookContentExternalLoader implements BookContentLoader {
 	private BookContentExternalLoader() {}
 
 	@Override
-	public void findFiles(Book book, String dir, List<ResourceLocation> list) {
+	public void findFiles(Book book, String dir, List<Identifier> list) {
 		File root = new File(BookFolderLoader.loadDir, book.id.getPath());
 		File enUs = new File(root, BookContentsBuilder.DEFAULT_LANG);
 		if (enUs.exists()) {
@@ -31,7 +29,7 @@ public final class BookContentExternalLoader implements BookContentLoader {
 		}
 	}
 
-	private void crawl(File realRoot, File root, List<ResourceLocation> list) {
+	private void crawl(File realRoot, File root, List<Identifier> list) {
 		File[] files = root.listFiles();
 		for (File f : files) {
 			if (f.isDirectory()) {
@@ -42,16 +40,16 @@ public final class BookContentExternalLoader implements BookContentLoader {
 		}
 	}
 
-	private ResourceLocation relativize(File root, File f) {
+	private Identifier relativize(File root, File f) {
 		String rootPath = root.getAbsolutePath();
 		String filePath = f.getAbsolutePath().substring(rootPath.length() + 1);
 		String cleanPath = FilenameUtils.removeExtension(FilenameUtils.separatorsToUnix(filePath));
 
-		return new ResourceLocation(Patchouli.MOD_ID, cleanPath);
+		return new Identifier(Patchouli.MOD_ID, cleanPath);
 	}
 
 	@Override
-	public InputStream loadJson(Book book, ResourceLocation resloc, ResourceLocation fallback) {
+	public InputStream loadJson(Book book, Identifier resloc, Identifier fallback) {
 		try {
 			String path = resloc.getPath().substring(BookFolderLoader.loadDir.getName().length());
 			File targetFile = new File(BookFolderLoader.loadDir, path);

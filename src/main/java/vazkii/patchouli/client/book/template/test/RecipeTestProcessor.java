@@ -1,12 +1,11 @@
 package vazkii.patchouli.client.book.template.test;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeManager;
-
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.item.ItemStack;
+import net.minecraft.recipe.Ingredient;
+import net.minecraft.recipe.Recipe;
+import net.minecraft.recipe.RecipeManager;
+import net.minecraft.util.Identifier;
 import vazkii.patchouli.api.IComponentProcessor;
 import vazkii.patchouli.api.IVariable;
 import vazkii.patchouli.api.IVariableProvider;
@@ -19,8 +18,8 @@ public class RecipeTestProcessor implements IComponentProcessor {
 	public void setup(IVariableProvider variables) {
 		// TODO probably add a recipe serializer?
 		String recipeId = variables.get("recipe").asString();
-		RecipeManager manager = Minecraft.getInstance().level.getRecipeManager();
-		recipe = manager.byKey(new ResourceLocation(recipeId)).orElseThrow(IllegalArgumentException::new);
+		RecipeManager manager = MinecraftClient.getInstance().world.getRecipeManager();
+		recipe = manager.get(new Identifier(recipeId)).orElseThrow(IllegalArgumentException::new);
 	}
 
 	@Override
@@ -28,17 +27,17 @@ public class RecipeTestProcessor implements IComponentProcessor {
 		if (key.startsWith("item")) {
 			int index = Integer.parseInt(key.substring(4)) - 1;
 			Ingredient ingredient = recipe.getIngredients().get(index);
-			ItemStack[] stacks = ingredient.getItems();
+			ItemStack[] stacks = ingredient.getMatchingStacks();
 			ItemStack stack = stacks.length == 0 ? ItemStack.EMPTY : stacks[0];
 
 			return IVariable.from(stack);
 		} else if (key.equals("text")) {
-			ItemStack out = recipe.getResultItem();
-			return IVariable.wrap(out.getCount() + "x$(br)" + out.getHoverName());
+			ItemStack out = recipe.getOutput();
+			return IVariable.wrap(out.getCount() + "x$(br)" + out.toHoverableText());
 		} else if (key.equals("icount")) {
-			return IVariable.wrap(recipe.getResultItem().getCount());
+			return IVariable.wrap(recipe.getOutput().getCount());
 		} else if (key.equals("iname")) {
-			return IVariable.wrap(recipe.getResultItem().getHoverName().getString());
+			return IVariable.wrap(recipe.getOutput().toHoverableText().getString());
 		}
 
 		return null;

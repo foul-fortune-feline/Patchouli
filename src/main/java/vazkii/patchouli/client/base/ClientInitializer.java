@@ -5,13 +5,20 @@ import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.client.model.FabricModelPredicateProviderRegistry;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
+import net.fabricmc.fabric.mixin.object.builder.ModelPredicateProviderRegistryAccessor;
+import net.fabricmc.fabric.mixin.object.builder.ModelPredicateProviderRegistrySpecificAccessor;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.item.UnclampedModelPredicateProvider;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.ModelLoader;
 import net.minecraft.client.util.ModelIdentifier;
+import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 import vazkii.patchouli.client.book.ClientBookRegistry;
 import vazkii.patchouli.client.handler.BookRightClickHandler;
 import vazkii.patchouli.client.handler.MultiblockVisualizationHandler;
@@ -33,13 +40,12 @@ public class ClientInitializer implements ClientModInitializer {
 		MultiblockVisualizationHandler.init();
 		NetworkHandler.registerMessages();
 
-		ModelLoadingRegistry.INSTANCE.registerModelProvider((manager, register) -> BookRegistry.INSTANCE.books.values().stream()
-				.map(b -> new ModelIdentifier(b.model, "inventory"))
-				.forEach(register));
+		ModelLoadingRegistry.INSTANCE.registerModelProvider((manager, register) -> BookRegistry.INSTANCE.books.values()
+				.stream().map(b -> new ModelIdentifier(b.model, "inventory")).forEach(register));
 
-		FabricModelPredicateProviderRegistry.register(PatchouliItems.BOOK,
-				new Identifier(Patchouli.MOD_ID, "completion"),
+		ModelPredicateProviderRegistryAccessor.callRegister(new Identifier(Patchouli.MOD_ID, "completion"),
 				(stack, world, entity, seed) -> ItemModBook.getCompletion(stack));
+
 
 		ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new SimpleSynchronousResourceReloadListener() {
 			private final Identifier id = new Identifier(Patchouli.MOD_ID, "resource_pack_books");

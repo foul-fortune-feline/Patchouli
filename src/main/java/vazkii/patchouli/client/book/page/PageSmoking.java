@@ -1,8 +1,7 @@
 package vazkii.patchouli.client.book.page;
 
-import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.item.crafting.SmokingRecipe;
-
+import net.minecraft.recipe.RecipeType;
+import net.minecraft.recipe.SmokingRecipe;
 import vazkii.patchouli.client.book.page.abstr.PageSimpleProcessingRecipe;
 
 public class PageSmoking extends PageSimpleProcessingRecipe<SmokingRecipe> {

@@ -1,59 +1,58 @@
 package vazkii.patchouli.common.handler;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.PlayerManager;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.LecternBlock;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.LecternBlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.BlockHitResult;
-
+import net.minecraft.block.BlockState;
+import net.minecraft.block.LecternBlock;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.LecternBlockEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import vazkii.patchouli.api.PatchouliAPI;
 import vazkii.patchouli.common.book.Book;
 import vazkii.patchouli.common.util.ItemStackUtil;
 
 public class LecternEventHandler {
 
-	public static InteractionResult rightClick(Player player, Level world, InteractionHand hand, BlockHitResult hit) {
+	public static ActionResult rightClick(PlayerEntity player, World world, Hand hand, BlockHitResult hit) {
 		BlockPos pos = hit.getBlockPos();
 		BlockState state = world.getBlockState(pos);
 		BlockEntity tileEntity = world.getBlockEntity(pos);
 		if (tileEntity instanceof LecternBlockEntity lectern) {
-			if (state.getValue(LecternBlock.HAS_BOOK)) {
-				if (player.isSecondaryUseActive()) {
+			if (state.contains(LecternBlock.HAS_BOOK)) {
+				if (player.isSneaking()) {
 					takeBook(player, lectern);
 				} else {
 					Book book = ItemStackUtil.getBookFromStack(lectern.getBook());
 					if (book != null) {
-						if (!world.isClientSide) {
-							PatchouliAPI.get().openBookGUI((PlayerManager) player, book.id);
+						if (!world.isClient) {
+							PatchouliAPI.get().openBookGUI((ServerPlayerEntity) player, book.id);
 						}
-						return InteractionResult.SUCCESS;
+						return ActionResult.SUCCESS;
 					}
 				}
 			} else {
-				ItemStack stack = player.getItemInHand(hand);
+				ItemStack stack = player.getStackInHand(hand);
 				if (ItemStackUtil.getBookFromStack(stack) != null) {
-					if (LecternBlock.tryPlaceBook(player, world, pos, state, stack)) {
-						return InteractionResult.SUCCESS;
+					if (LecternBlock.putBookIfAbsent(player, world, pos, state, stack)) {
+						return ActionResult.SUCCESS;
 					}
 				}
 			}
 		}
-		return InteractionResult.PASS;
+		return ActionResult.PASS;
 	}
 
-	private static void takeBook(Player player, LecternBlockEntity tileEntity) {
+	private static void takeBook(PlayerEntity player, LecternBlockEntity tileEntity) {
 		ItemStack itemstack = tileEntity.getBook();
 		tileEntity.setBook(ItemStack.EMPTY);
-		LecternBlock.resetBookState(tileEntity.getLevel(), tileEntity.getBlockPos(), tileEntity.getBlockState(), false);
-		if (!player.getInventory().add(itemstack)) {
-			player.drop(itemstack, false);
+		LecternBlock.setHasBook(tileEntity.getWorld(), tileEntity.getPos(), tileEntity.getCachedState(), false);
+		if (!player.getInventory().insertStack(itemstack)) {
+			player.dropItem(itemstack, false);
 		}
 	}
 }

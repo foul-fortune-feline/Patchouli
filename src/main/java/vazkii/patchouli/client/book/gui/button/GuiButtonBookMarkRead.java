@@ -1,11 +1,10 @@
 package vazkii.patchouli.client.book.gui.button;
 
-import com.mojang.blaze3d.vertex.MatrixStack;
-
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
-
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.LiteralTextContent;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import vazkii.patchouli.client.base.PersistentData;
 import vazkii.patchouli.client.book.BookCategory;
 import vazkii.patchouli.client.book.BookEntry;
@@ -18,7 +17,7 @@ public class GuiButtonBookMarkRead extends GuiButtonBook {
 	private final Book book;
 
 	public GuiButtonBookMarkRead(GuiBook parent, int x, int y) {
-		super(parent, x, y, 308, 31, 11, 11, Button::onPress, getTooltip(parent.book));
+		super(parent, x, y, 308, 31, 11, 11, ButtonWidget::onPress, getTooltip(parent.book));
 		this.book = parent.book;
 	}
 
@@ -28,11 +27,11 @@ public class GuiButtonBookMarkRead extends GuiButtonBook {
 		int py = (int) (y + 0.5);
 		GuiBook.drawFromTexture(ms, book, x, y, 285, 160, 13, 10);
 		GuiBook.drawFromTexture(ms, book, px, py, u, v, width, height);
-		if (isHoveredOrFocused()) {
+		if (isHovered() || isFocused()) {
 			GuiBook.drawFromTexture(ms, book, px, py, u + 11, v, width, height);
 			parent.setTooltip(getTooltip());
 		}
-		parent.getMinecraft().font.drawShadow(ms, "+", px - 0.5F, py - 0.2F, 0x00FF01);
+		parent.getMinecraft().textRenderer.drawWithShadow(ms, "+", px - 0.5F, py - 0.2F, 0x00FF01);
 	}
 
 	@Override
@@ -73,9 +72,9 @@ public class GuiButtonBookMarkRead extends GuiButtonBook {
 		}
 	}
 
-	private static Component getTooltip(Book book) {
+	private static Text getTooltip(Book book) {
 		String text = isMainPage(book) ? "patchouli.gui.lexicon.button.mark_all_read" : "patchouli.gui.lexicon.button.mark_category_read";
-		return new TranslatableComponent(text);
+		return MutableText.of(new LiteralTextContent(text));
 	}
 
 	private static boolean isMainPage(Book book) {

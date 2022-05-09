@@ -1,7 +1,7 @@
 package vazkii.patchouli.api.stub;
 
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.data.client.VariantSettings;
+import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
@@ -48,27 +48,27 @@ public class StubMultiblock implements IMultiblock {
 	}
 
 	@Override
-	public void place(World world, BlockPos pos, VariantSettings.Rotation rotation) {
+	public void place(World world, BlockPos pos, BlockRotation rotation) {
 		// NO-OP
 	}
 
 	@Override
-	public Pair<BlockPos, Collection<SimulateResult>> simulate(World world, BlockPos anchor, VariantSettings.Rotation rotation, boolean forView) {
+	public Pair<BlockPos, Collection<SimulateResult>> simulate(World world, BlockPos anchor, BlockRotation rotation, boolean forView) {
 		return Pair.of(BlockPos.ORIGIN, Collections.emptyList());
 	}
 
 	@Override
-	public VariantSettings.Rotation validate(World world, BlockPos pos) {
+	public BlockRotation validate(World world, BlockPos pos) {
 		return null;
 	}
 
 	@Override
-	public boolean validate(World world, BlockPos pos, VariantSettings.Rotation rotation) {
+	public boolean validate(World world, BlockPos pos, BlockRotation rotation) {
 		return false;
 	}
 
 	@Override
-	public boolean test(World world, BlockPos start, int x, int y, int z, VariantSettings.Rotation rotation) {
+	public boolean test(World world, BlockPos start, int x, int y, int z, BlockRotation rotation) {
 		return false;
 	}
 

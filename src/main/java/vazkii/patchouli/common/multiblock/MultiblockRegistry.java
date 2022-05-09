@@ -1,7 +1,5 @@
 package vazkii.patchouli.common.multiblock;
 
-import net.minecraft.resources.ResourceLocation;
-
 import net.minecraft.util.Identifier;
 import vazkii.patchouli.api.IMultiblock;
 

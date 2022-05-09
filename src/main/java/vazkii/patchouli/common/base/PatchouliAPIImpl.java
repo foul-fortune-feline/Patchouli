@@ -1,33 +1,20 @@
 package vazkii.patchouli.common.base;
 
 import com.google.common.base.Preconditions;
-
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.core.BlockPos;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
-import net.minecraft.screen.Property;
-import net.minecraft.server.level.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.state.property.Property;
 import net.minecraft.text.Text;
+import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.Property;
-
 import org.apache.commons.io.IOUtils;
-
 import vazkii.patchouli.api.IMultiblock;
 import vazkii.patchouli.api.IStateMatcher;
 import vazkii.patchouli.api.IStyleStack;
@@ -48,7 +35,6 @@ import vazkii.patchouli.common.multiblock.StateMatcher;
 import vazkii.patchouli.common.network.message.MessageOpenBookGui;
 
 import javax.annotation.Nonnull;
-
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
@@ -178,7 +164,8 @@ public class PatchouliAPIImpl implements IPatchouliAPI {
 	}
 
 	@Override
-	public void showMultiblock(@Nonnull IMultiblock multiblock, @Nonnull Text displayName, @Nonnull BlockPos center, @Nonnull Rotation rotation) {
+	public void showMultiblock(@Nonnull IMultiblock multiblock, @Nonnull Text displayName, @Nonnull BlockPos center,
+							   @Nonnull BlockRotation rotation) {
 		assertPhysicalClient();
 		MultiblockVisualizationHandler.setMultiblock(multiblock, displayName, null, false);
 		MultiblockVisualizationHandler.anchorTo(center, rotation);
@@ -216,7 +203,7 @@ public class PatchouliAPIImpl implements IPatchouliAPI {
 	}
 
 	@Override
-	public IStateMatcher propertyMatcher(BlockState state, Property... properties) {
+	public IStateMatcher propertyMatcher(BlockState state, Property<?>... properties) {
 		return StateMatcher.fromStateWithFilter(state, Arrays.asList(properties)::contains);
 	}
 

@@ -262,10 +262,10 @@ public class GuiBookEntry extends GuiBook implements IComponentRenderContext {
 		}
 	}
 
-	@Override
-	public void setHoverTooltip(List<String> tooltip) {
-		setTooltip(tooltip.stream().map(LiteralTextContent::new).map(MutableText::of).collect(Collectors.toList()));
-	}
+//	@Override
+//	public void setHoverTooltip(List<String> tooltip) {
+//		setTooltip(tooltip.stream().map(LiteralTextContent::new).map(MutableText::of).collect(Collectors.toList()));
+//	}
 
 	@Override
 	public void setHoverTooltipComponents(@Nonnull List<Text> tooltip) {

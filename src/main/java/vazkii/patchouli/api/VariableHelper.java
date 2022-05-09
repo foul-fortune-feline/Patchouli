@@ -14,7 +14,8 @@ public interface VariableHelper {
 
 	Supplier<VariableHelper> INSTANCE = Suppliers.memoize(() -> {
 		try {
-			return (VariableHelper) Class.forName("vazkii.patchouli.client.book.template.variable.VariableHelperImpl").newInstance();
+			return (VariableHelper) Class.forName("vazkii.patchouli.client.book.template.variable.VariableHelperImpl")
+					.getDeclaredConstructor().newInstance();
 		} catch (ReflectiveOperationException e) {
 			return new VariableHelper() {};
 		}

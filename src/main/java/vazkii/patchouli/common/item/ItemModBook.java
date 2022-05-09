@@ -1,14 +1,24 @@
 package vazkii.patchouli.common.item;
 
+import net.minecraft.client.item.TooltipContext;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.text.*;
+import net.minecraft.util.*;
+import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.world.World;
 import vazkii.patchouli.api.PatchouliAPI;
 import vazkii.patchouli.client.book.BookEntry;
 import vazkii.patchouli.common.base.PatchouliSounds;
 import vazkii.patchouli.common.book.Book;
 import vazkii.patchouli.common.book.BookRegistry;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 public class ItemModBook extends Item {
@@ -16,9 +26,9 @@ public class ItemModBook extends Item {
 	private static final String TAG_BOOK = "patchouli:book";
 
 	public ItemModBook() {
-		super(new Item.Properties()
-				.stacksTo(1)
-				.tab(CreativeModeTab.TAB_MISC));
+		super(new Item.Settings()
+				.maxCount(1)
+				.group(ItemGroup.MISC));
 	}
 
 	public static float getCompletion(ItemStack stack) {
@@ -48,21 +58,21 @@ public class ItemModBook extends Item {
 		return forBook(book.id);
 	}
 
-	public static ItemStack forBook(ResourceLocation book) {
+	public static ItemStack forBook(Identifier book) {
 		ItemStack stack = new ItemStack(PatchouliItems.BOOK);
 
-		CompoundTag cmp = new CompoundTag();
+		NbtCompound cmp = new NbtCompound();
 		cmp.putString(TAG_BOOK, book.toString());
-		stack.setTag(cmp);
+		stack.setNbt(cmp);
 
 		return stack;
 	}
 
 	@Override
-	public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> items) {
-		String tabName = tab.getRecipeFolderName();
+	public void appendStacks(ItemGroup tab, DefaultedList<ItemStack> items) {
+		String tabName = tab.getName();
 		BookRegistry.INSTANCE.books.values().forEach(b -> {
-			if (!b.noBook && !b.isExtension && (tab == CreativeModeTab.TAB_SEARCH || b.creativeTab.equals(tabName))) {
+			if (!b.noBook && !b.isExtension && (tab == ItemGroup.SEARCH || b.creativeTab.equals(tabName))) {
 				items.add(forBook(b));
 			}
 		});
@@ -98,55 +108,56 @@ public class ItemModBook extends Item {
 	*/
 
 	@Override
-	public Component getName(ItemStack stack) {
+	public Text getName(ItemStack stack) {
 		Book book = getBook(stack);
 		if (book != null) {
-			return new TranslatableComponent(book.name);
+			return MutableText.of(new TranslatableTextContent(book.name));
 		}
 
 		return super.getName(stack);
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
-		super.appendHoverText(stack, worldIn, tooltip, flagIn);
+	public void appendTooltip(ItemStack stack, @Nullable World worldIn, List<Text> tooltip, TooltipContext flagIn) {
+		super.appendTooltip(stack, worldIn, tooltip, flagIn);
 
-		ResourceLocation rl = getBookId(stack);
+		Identifier rl = getBookId(stack);
 		if (flagIn.isAdvanced()) {
-			tooltip.add(new TextComponent("Book ID: " + rl).withStyle(ChatFormatting.GRAY));
+			tooltip.add(MutableText.of(new LiteralTextContent("Book ID: " + rl))
+					.setStyle(Style.EMPTY.withFormatting(Formatting.GRAY)));
 		}
 
 		Book book = getBook(stack);
 		if (book != null && !book.getContents().isErrored()) {
-			tooltip.add(book.getSubtitle().withStyle(ChatFormatting.GRAY));
+			tooltip.add(book.getSubtitle().setStyle(Style.EMPTY.withFormatting(Formatting.GRAY)));
 		} else if (book == null) {
 			if (rl == null) {
-				tooltip.add(new TranslatableComponent("item.patchouli.guide_book.undefined")
-						.withStyle(ChatFormatting.DARK_GRAY));
+				tooltip.add(MutableText.of(new TranslatableTextContent("item.patchouli.guide_book.undefined"))
+						.setStyle(Style.EMPTY.withFormatting(Formatting.DARK_GRAY)));
 			} else {
-				tooltip.add(new TranslatableComponent("item.patchouli.guide_book.invalid", rl)
-						.withStyle(ChatFormatting.DARK_GRAY));
+				tooltip.add(MutableText.of(new TranslatableTextContent("item.patchouli.guide_book.invalid", rl))
+						.setStyle(Style.EMPTY.withFormatting(Formatting.DARK_GRAY)));
 			}
 		}
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level worldIn, Player playerIn, InteractionHand handIn) {
-		ItemStack stack = playerIn.getItemInHand(handIn);
+	public TypedActionResult<ItemStack> use(World worldIn, PlayerEntity playerIn, Hand handIn) {
+		ItemStack stack = playerIn.getStackInHand(handIn);
 		Book book = getBook(stack);
 		if (book == null) {
-			return new InteractionResultHolder<>(InteractionResult.FAIL, stack);
+			return new TypedActionResult<>(ActionResult.FAIL, stack);
 		}
 
-		if (playerIn instanceof PlayerManager) {
-			PatchouliAPI.get().openBookGUI((PlayerManager) playerIn, book.id);
+		if (playerIn instanceof ServerPlayerEntity) {
+			PatchouliAPI.get().openBookGUI((ServerPlayerEntity) playerIn, book.id);
 
 			// This plays the sound to others nearby, playing to the actual opening player handled from the packet
 			SoundEvent sfx = PatchouliSounds.getSound(book.openSound, PatchouliSounds.BOOK_OPEN);
 			playerIn.playSound(sfx, 1F, (float) (0.7 + Math.random() * 0.4));
 		}
 
-		return new InteractionResultHolder<>(InteractionResult.SUCCESS, stack);
+		return new TypedActionResult<>(ActionResult.SUCCESS, stack);
 	}
 
 }

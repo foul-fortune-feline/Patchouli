@@ -59,7 +59,7 @@ public class BookTextRenderer {
 
 	public void render(MatrixStack ms, int mouseX, int mouseY) {
 		if (!words.isEmpty()) {
-			TextRenderer font = MinecraftClient.getInstance().textRenderer;
+			TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
 			Style style = book.getFontStyle();
 			Word first = words.get(0);
 			ms.push();
@@ -68,7 +68,7 @@ public class BookTextRenderer {
 			ms.translate(-first.x, -first.y, 0);
 			int scaledX = (int) rescale(mouseX, first.x);
 			int scaledY = (int) rescale(mouseY, first.y);
-			words.forEach(word -> word.render(ms, font, style, scaledX, scaledY));
+			words.forEach(word -> word.render(ms, textRenderer, style, scaledX, scaledY));
 			ms.pop();
 		}
 	}

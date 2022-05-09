@@ -1,9 +1,7 @@
 package vazkii.patchouli.client.book.page.abstr;
 
-import com.mojang.blaze3d.vertex.MatrixStack;
-
-import net.minecraft.network.chat.Component;
-
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.Text;
 import vazkii.patchouli.api.IVariable;
 import vazkii.patchouli.client.book.BookPage;
 import vazkii.patchouli.client.book.gui.BookTextRenderer;
@@ -23,7 +21,7 @@ public abstract class PageWithText extends BookPage {
 			text = IVariable.wrap("");
 		}
 
-		textRender = new BookTextRenderer(parent, text.as(Component.class), 0, getTextHeight());
+		textRender = new BookTextRenderer(parent, text.as(Text.class), 0, getTextHeight());
 	}
 
 	public abstract int getTextHeight();

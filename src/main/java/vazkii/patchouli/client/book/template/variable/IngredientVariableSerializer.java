@@ -1,9 +1,7 @@
 package vazkii.patchouli.client.book.template.variable;
 
 import com.google.gson.JsonElement;
-
-import net.minecraft.world.item.crafting.Ingredient;
-
+import net.minecraft.recipe.Ingredient;
 import vazkii.patchouli.api.IVariableSerializer;
 import vazkii.patchouli.common.util.ItemStackUtil;
 

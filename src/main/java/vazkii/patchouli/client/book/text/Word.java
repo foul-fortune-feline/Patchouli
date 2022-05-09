@@ -1,5 +1,6 @@
 package vazkii.patchouli.client.book.text;
 
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.HoverEvent;
@@ -49,7 +50,7 @@ public class Word {
 			gui.renderTextHoverEffect(ms, text.getStyle(), (int) gui.getRelativeX(mouseX), (int) gui.getRelativeY(mouseY));
 		}
 
-		textRenderer.draw(ms, toRender, x, y, -1);
+		textRenderer.draw(ms, toRender, x, y, 0);
 	}
 
 	public boolean click(double mouseX, double mouseY, int mouseButton) {

@@ -1,12 +1,10 @@
 package vazkii.patchouli.client.book.template.component;
 
 import com.google.gson.annotations.SerializedName;
-import com.mojang.blaze3d.vertex.MatrixStack;
-
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Level;
-
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.Entity;
+import net.minecraft.world.World;
 import vazkii.patchouli.api.IVariable;
 import vazkii.patchouli.client.base.ClientTicker;
 import vazkii.patchouli.client.book.BookContentsBuilder;
@@ -32,7 +30,7 @@ public class ComponentEntity extends TemplateComponent {
 
 	transient boolean errored;
 	transient Entity entity;
-	transient Function<Level, Entity> creator;
+	transient Function<World, Entity> creator;
 	transient float renderScale, offset;
 
 	@Override
@@ -42,18 +40,18 @@ public class ComponentEntity extends TemplateComponent {
 
 	@Override
 	public void onDisplayed(BookPage page, GuiBookEntry parent, int left, int top) {
-		loadEntity(page.mc.level);
+		loadEntity(page.mc.world);
 	}
 
 	@Override
 	public void render(MatrixStack ms, BookPage page, int mouseX, int mouseY, float pticks) {
 		if (errored) {
-			page.fontRenderer.drawShadow(ms, I18n.get("patchouli.gui.lexicon.loading_error"), x, y, 0xFF0000);
+			page.textRenderer.drawWithShadow(ms, I18n.translate("patchouli.gui.lexicon.loading_error"), x, y, 0xFF0000);
 		}
 
 		if (entity != null) {
 			float rotation = rotate ? ClientTicker.total : defaultRotation;
-			PageEntity.renderEntity(ms, entity, page.mc.level, x, y, rotation, renderScale, offset);
+			PageEntity.renderEntity(ms, entity, page.mc.world, x, y, rotation, renderScale, offset);
 		}
 	}
 
@@ -63,12 +61,12 @@ public class ComponentEntity extends TemplateComponent {
 		entityId = lookup.apply(entityId);
 	}
 
-	private void loadEntity(Level world) {
+	private void loadEntity(World world) {
 		if (!errored && (entity == null || !entity.isAlive())) {
 			try {
 				entity = creator.apply(world);
-				float width = entity.getBbWidth();
-				float height = entity.getBbHeight();
+				float width = entity.getWidth();
+				float height = entity.getHeight();
 
 				float entitySize = Math.max(width, height);
 				entitySize = Math.max(1F, entitySize);

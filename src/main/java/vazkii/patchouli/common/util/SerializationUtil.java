@@ -2,9 +2,7 @@ package vazkii.patchouli.common.util;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
-import net.minecraft.resources.ResourceLocation;
-
+import net.minecraft.util.Identifier;
 import vazkii.patchouli.api.IVariable;
 import vazkii.patchouli.common.base.Patchouli;
 
@@ -15,7 +13,7 @@ import java.util.function.Supplier;
 public final class SerializationUtil {
 
 	public static final Gson RAW_GSON = new GsonBuilder()
-			.registerTypeAdapter(ResourceLocation.class, new ResourceLocation.Serializer())
+			.registerTypeAdapter(Identifier.class, new Identifier.Serializer())
 			.registerTypeAdapter(IVariable.class, new IVariable.Serializer())
 			.create();
 	public static final Gson PRETTY_GSON = new GsonBuilder().setPrettyPrinting().create();

@@ -1,49 +1,35 @@
 package vazkii.patchouli.common.multiblock;
 
 import com.mojang.datafixers.util.Pair;
-
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.Vec3i;
-import net.minecraft.data.client.VariantSettings;
-import net.minecraft.data.worldgen.biome.Biomes;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
-import net.minecraft.resources.Identifier;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.world.BlockRenderView;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
-import net.minecraft.world.level.BlockAndTintGetter;
-import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.WorldAccess;
+import net.minecraft.world.biome.BiomeKeys;
+import net.minecraft.world.chunk.light.LightingProvider;
 import net.minecraft.world.level.ColorResolver;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.level.block.EntityBlock;
-import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.lighting.LevelLightEngine;
-import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.material.Fluids;
-
 import vazkii.patchouli.api.IMultiblock;
 import vazkii.patchouli.api.TriPredicate;
 import vazkii.patchouli.common.util.RotationUtil;
 
 import javax.annotation.Nullable;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class AbstractMultiblock implements IMultiblock, BlockAndTintGetter {
+public abstract class AbstractMultiblock implements IMultiblock, BlockRenderView {
 	public Identifier id;
 	protected int offX, offY, offZ;
 	protected int viewOffX, viewOffY, viewOffZ;
@@ -131,7 +117,7 @@ public abstract class AbstractMultiblock implements IMultiblock, BlockAndTintGet
 
 		return sim.getSecond().stream().allMatch(r -> {
 			BlockPos checkPos = r.getWorldPosition();
-			TriPredicate<BlockGetter, BlockPos, BlockState> pred = r.getStateMatcher().getStatePredicate();
+			TriPredicate<WorldAccess, BlockPos, BlockState> pred = r.getStateMatcher().getStatePredicate();
 			BlockState state = world.getBlockState(checkPos).rotate(RotationUtil.fixHorizontal(rotation));
 
 			return pred.test(world, checkPos, state);
@@ -151,8 +137,8 @@ public abstract class AbstractMultiblock implements IMultiblock, BlockAndTintGet
 	@Nullable
 	public BlockEntity getBlockEntity(BlockPos pos) {
 		BlockState state = getBlockState(pos);
-		if (state.getBlock() instanceof EntityBlock) {
-			return teCache.computeIfAbsent(pos.immutable(), p -> ((EntityBlock) state.getBlock()).newBlockEntity(pos, state));
+		if (state.getBlock() instanceof BlockWithEntity) {
+			return teCache.computeIfAbsent(pos.toImmutable(), p -> ((BlockWithEntity) state.getBlock()).createBlockEntity(pos, state));
 		}
 		return null;
 	}
@@ -166,38 +152,39 @@ public abstract class AbstractMultiblock implements IMultiblock, BlockAndTintGet
 	public abstract Vec3i getSize();
 
 	@Override
-	public float getShade(Direction direction, boolean shaded) {
+	public float getBrightness(Direction direction, boolean shaded) {
 		return 1.0F;
 	}
 
 	@Override
-	public LevelLightEngine getLightEngine() {
+	public LightingProvider getLightingProvider() {
 		return null;
 	}
 
 	@Override
-	public int getBlockTint(BlockPos pos, ColorResolver color) {
-		return color.getColor(Biomes.PLAINS, pos.getX(), pos.getZ());
+	public int getColor(BlockPos pos, ColorResolver color) {
+		return color.getColor(MinecraftClient.getInstance().world.getRegistryManager().get(Registry.BIOME_KEY).get(BiomeKeys.PLAINS),
+				pos.getX(), pos.getZ());
 	}
 
 	@Override
-	public int getBrightness(LightType type, BlockPos pos) {
+	public int getLightLevel(LightType type, BlockPos pos) {
 		return 15;
 	}
 
 	@Override
-	public int getRawBrightness(BlockPos pos, int ambientDarkening) {
+	public int getBaseLightLevel(BlockPos pos, int ambientDarkening) {
 		return 15 - ambientDarkening;
 	}
 
 	// These heights were assumed based being derivative of old behavior, but it may be ideal to change
 	@Override
 	public int getHeight() {
-		return 255;
+		return 383;
 	}
 
 	@Override
-	public int getMinBuildHeight() {
-		return 0;
+	public int getBottomY() {
+		return -64;
 	}
 }

@@ -1,11 +1,10 @@
 package vazkii.patchouli.client.book.template.test;
 
-import com.mojang.blaze3d.vertex.MatrixStack;
-
-import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.LiteralTextContent;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import vazkii.patchouli.api.IComponentRenderContext;
 import vazkii.patchouli.api.ICustomComponent;
 import vazkii.patchouli.api.IVariable;
@@ -26,8 +25,8 @@ public class ComponentCustomTest implements ICustomComponent {
 
 	@Override
 	public void render(MatrixStack ms, IComponentRenderContext context, float pticks, int mouseX, int mouseY) {
-		Component toRender = new TextComponent(text).setStyle(context.getStyle());
-		Minecraft.getInstance().font.drawShadow(ms, toRender, x, y, -1);
+		Text toRender = MutableText.of(new LiteralTextContent(text)).setStyle(context.getStyle());
+		MinecraftClient.getInstance().textRenderer.drawWithShadow(ms, toRender, x, y, -1);
 	}
 
 	@Override

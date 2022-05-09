@@ -2,9 +2,7 @@ package vazkii.patchouli.common.multiblock;
 
 import com.google.gson.annotations.SerializedName;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-
-import net.minecraft.core.BlockPos;
-
+import net.minecraft.util.math.BlockPos;
 import vazkii.patchouli.api.IStateMatcher;
 
 import java.util.HashMap;

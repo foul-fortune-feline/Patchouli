@@ -1,9 +1,9 @@
 package vazkii.patchouli.client.book.gui;
 
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
-
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.TranslatableTextContent;
+import net.minecraft.util.Identifier;
 import vazkii.patchouli.client.base.PersistentData;
 import vazkii.patchouli.client.base.PersistentData.DataHolder.BookData;
 import vazkii.patchouli.client.book.BookEntry;
@@ -15,12 +15,12 @@ import java.util.stream.Collectors;
 public class GuiBookHistory extends GuiBookEntryList {
 
 	public GuiBookHistory(Book book) {
-		super(book, new TranslatableComponent("patchouli.gui.lexicon.history"));
+		super(book, MutableText.of(new TranslatableTextContent("patchouli.gui.lexicon.history")));
 	}
 
 	@Override
 	protected String getDescriptionText() {
-		return I18n.get("patchouli.gui.lexicon.history.info");
+		return I18n.translate("patchouli.gui.lexicon.history.info");
 	}
 
 	@Override
@@ -38,7 +38,7 @@ public class GuiBookHistory extends GuiBookEntryList {
 		BookData data = PersistentData.data.getBookData(book);
 
 		return data.history.stream()
-				.map(ResourceLocation::new)
+				.map(Identifier::new)
 				.map((res) -> book.getContents().entries.get(res))
 				.filter((e) -> e != null && !e.isLocked())
 				.collect(Collectors.toList());

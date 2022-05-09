@@ -1,13 +1,11 @@
 package vazkii.patchouli.client.book;
 
 import com.google.common.base.Preconditions;
-
-import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.ResourceManager;
-
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.resource.Resource;
+import net.minecraft.resource.ResourceManager;
+import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
-
 import vazkii.patchouli.common.base.Patchouli;
 import vazkii.patchouli.common.book.Book;
 import vazkii.patchouli.common.book.BookRegistry;
@@ -17,6 +15,7 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public final class BookContentResourceLoader implements BookContentLoader {
 	public static final BookContentResourceLoader INSTANCE = new BookContentResourceLoader();
@@ -24,9 +23,10 @@ public final class BookContentResourceLoader implements BookContentLoader {
 	private BookContentResourceLoader() {}
 
 	@Override
-	public void findFiles(Book book, String dir, List<ResourceLocation> list) {
+	public void findFiles(Book book, String dir, List<Identifier> list) {
 		String prefix = String.format("%s/%s/%s/%s", BookRegistry.BOOKS_LOCATION, book.id.getPath(), BookContentsBuilder.DEFAULT_LANG, dir);
-		Collection<ResourceLocation> files = Minecraft.getInstance().getResourceManager().listResources(prefix, p -> p.endsWith(".json"));
+		Collection<Identifier> files = MinecraftClient.getInstance().getResourceManager()
+				.findAllResources(prefix, p -> p.getPath().endsWith(".json")).keySet();
 
 		files.stream()
 				.distinct()
@@ -42,24 +42,28 @@ public final class BookContentResourceLoader implements BookContentLoader {
 					if (newPath.startsWith("/")) {
 						newPath = newPath.substring(1);
 					}
-					return new ResourceLocation(file.getNamespace(), newPath);
+					return new Identifier(file.getNamespace(), newPath);
 				})
 				.forEach(list::add);
 	}
 
 	@Nullable
 	@Override
-	public InputStream loadJson(Book book, ResourceLocation file, @Nullable ResourceLocation fallback) {
+	public InputStream loadJson(Book book, Identifier file, @Nullable Identifier fallback) {
 		Patchouli.LOGGER.debug("Loading {}", file);
-		ResourceManager manager = Minecraft.getInstance().getResourceManager();
+		ResourceManager manager = MinecraftClient.getInstance().getResourceManager();
 		try {
-			if (manager.hasResource(file)) {
-				return manager.getResource(file).getInputStream();
-			} else if (fallback != null && manager.hasResource(fallback)) {
-				return manager.getResource(fallback).getInputStream();
-			} else {
-				return null;
+			Optional<Resource> r = manager.getResource(file);
+			if (r.isPresent()) {
+				return r.get().getInputStream();
 			}
+
+			if (fallback != null) {
+				r = manager.getResource(file);
+				Patchouli.LOGGER.error("Attempting load resource: {}", r.isPresent() ? r.get().getInputStream() : null);
+				return r.isPresent() ? r.get().getInputStream() : null;
+			}
+			return null;
 		} catch (IOException ex) {
 			throw new UncheckedIOException(ex);
 		}

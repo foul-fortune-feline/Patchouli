@@ -68,7 +68,7 @@ public class BookRegistry {
 			ModContainer mod = pair.getLeft();
 			Identifier res = pair.getRight();
 
-			try (InputStream stream = Files.newInputStream(mod.getPath(file))) {
+			try (InputStream stream = Files.newInputStream(mod.findPath(file).orElseThrow())) {
 				loadBook(mod, res, stream, false);
 			} catch (Exception e) {
 				Patchouli.LOGGER.error("Failed to load book {} defined by mod {}, skipping",
@@ -144,7 +144,7 @@ public class BookRegistry {
 		}
 
 		try {
-			walk(mod.getRootPath().resolve(base), rootFilter, processor, visitAllFiles, maxDepth);
+			walk(mod.getRootPaths().get(0).resolve(base), rootFilter, processor, visitAllFiles, maxDepth);
 		} catch (IOException ex) {
 			throw new UncheckedIOException(ex);
 		}

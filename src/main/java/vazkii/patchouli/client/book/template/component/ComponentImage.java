@@ -2,11 +2,9 @@ package vazkii.patchouli.client.book.template.component;
 
 import com.google.gson.annotations.SerializedName;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.MatrixStack;
-
-import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.resources.ResourceLocation;
-
+import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.Identifier;
 import vazkii.patchouli.api.IVariable;
 import vazkii.patchouli.client.book.BookContentsBuilder;
 import vazkii.patchouli.client.book.BookEntry;
@@ -26,11 +24,11 @@ public class ComponentImage extends TemplateComponent {
 
 	public float scale = 1F;
 
-	transient ResourceLocation resource;
+	transient Identifier resource;
 
 	@Override
 	public void build(BookContentsBuilder builder, BookPage page, BookEntry entry, int pageNum) {
-		resource = new ResourceLocation(image);
+		resource = new Identifier(image);
 	}
 
 	@Override
@@ -46,13 +44,13 @@ public class ComponentImage extends TemplateComponent {
 		}
 
 		RenderSystem.setShaderTexture(0, resource);
-		ms.pushPose();
+		ms.push();
 		ms.translate(x, y, 0);
 		ms.scale(scale, scale, scale);
 		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 		RenderSystem.enableBlend();
-		GuiComponent.blit(ms, 0, 0, u, v, width, height, textureWidth, textureHeight);
-		ms.popPose();
+		DrawableHelper.drawTexture(ms, 0, 0, u, v, width, height, textureWidth, textureHeight);
+		ms.pop();
 	}
 
 }

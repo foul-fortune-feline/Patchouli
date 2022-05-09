@@ -43,6 +43,10 @@ public class BookIcon implements Drawable {
 		this.res = res;
 	}
 
+	public void render(MatrixStack ms, int x, int y) {
+		render(ms, x, y, 0.0F);
+	}
+
 	public void render(MatrixStack ms, int x, int y, float delta) {
 		switch (type) {
 		case STACK:

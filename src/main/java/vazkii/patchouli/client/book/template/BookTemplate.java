@@ -162,7 +162,7 @@ public class BookTemplate {
 			if (processorClass != null && !processorClass.isEmpty()) {
 				try {
 					Class<?> clazz = Class.forName(processorClass);
-					processor = (IComponentProcessor) clazz.newInstance();
+					processor = (IComponentProcessor) clazz.getDeclaredConstructor().newInstance();
 				} catch (Exception e) {
 					throw new RuntimeException("Failed to create component processor " + processorClass, e);
 				}

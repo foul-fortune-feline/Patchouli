@@ -2,27 +2,21 @@ package vazkii.patchouli.client.book.page;
 
 import com.google.gson.annotations.SerializedName;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.MatrixStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
-import com.mojang.math.Vector4f;
-
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
-import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.render.OverlayTexture;
+import net.minecraft.client.render.RenderLayers;
+import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.block.entity.BlockEntityRenderer;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
-
+import net.minecraft.util.math.*;
+import net.minecraft.util.math.random.AbstractRandom;
+import net.minecraft.util.math.random.SimpleRandom;
 import vazkii.patchouli.api.IMultiblock;
 import vazkii.patchouli.client.base.ClientTicker;
 import vazkii.patchouli.client.base.PersistentData;
@@ -40,21 +34,20 @@ import vazkii.patchouli.common.multiblock.MultiblockRegistry;
 import vazkii.patchouli.common.multiblock.SerializedMultiblock;
 
 import javax.annotation.Nonnull;
-
 import java.util.Collections;
-import java.util.Random;
 import java.util.Set;
 import java.util.WeakHashMap;
 
 public class PageMultiblock extends PageWithText {
-	private static final Random RAND = new Random();
+	private static final AbstractRandom RAND = new SimpleRandom(System.currentTimeMillis());
 
 	String name = "";
 	@SerializedName("multiblock_id") Identifier multiblockId;
 
 	@SerializedName("multiblock") SerializedMultiblock serializedMultiblock;
 
-	@SerializedName("enable_visualize") boolean showVisualizeButton = true;
+	// TODO: Fix In-world visualization
+	@SerializedName("enable_visualize") boolean showVisualizeButton = false;
 
 	private transient AbstractMultiblock multiblockObj;
 	private transient ButtonWidget visualizeButton;
@@ -122,8 +115,9 @@ public class PageMultiblock extends PageWithText {
 		}
 	}
 
+	// TODO: Only displays some blocks for some reason
 	private void renderMultiblock(MatrixStack ms) {
-		multiblockObj.setWorld(mc.level);
+		multiblockObj.setWorld(mc.world);
 		Vec3i size = multiblockObj.getSize();
 		int sizeX = size.getX();
 		int sizeY = size.getY();
@@ -137,7 +131,7 @@ public class PageMultiblock extends PageWithText {
 
 		int xPos = GuiBook.PAGE_WIDTH / 2;
 		int yPos = 60;
-		ms.pushPose();
+		ms.push();
 		ms.translate(xPos, yPos, 100);
 		ms.scale(scale, scale, scale);
 		ms.translate(-(float) sizeX / 2, -(float) sizeY / 2, 0);
@@ -145,11 +139,11 @@ public class PageMultiblock extends PageWithText {
 		// Initial eye pos somewhere off in the distance in the -Z direction
 		Vector4f eye = new Vector4f(0, 0, -100, 1);
 		Matrix4f rotMat = new Matrix4f();
-		rotMat.setIdentity();
+		rotMat.loadIdentity();
 
 		// For each GL rotation done, track the opposite to keep the eye pos accurate
-		ms.mulPose(Vector3f.XP.rotationDegrees(-30F));
-		rotMat.multiply(Vector3f.XP.rotationDegrees(30));
+		ms.multiply(new Quaternion(Vec3f.POSITIVE_X, -30F, true));
+		rotMat.multiply(new Quaternion(Vec3f.POSITIVE_X, 30, true));
 
 		float offX = (float) -sizeX / 2;
 		float offZ = (float) -sizeZ / 2 + 1;
@@ -159,75 +153,77 @@ public class PageMultiblock extends PageWithText {
 			time += ClientTicker.partialTicks;
 		}
 		ms.translate(-offX, 0, -offZ);
-		ms.mulPose(Vector3f.YP.rotationDegrees(time));
-		rotMat.multiply(Vector3f.YP.rotationDegrees(-time));
-		ms.mulPose(Vector3f.YP.rotationDegrees(45));
-		rotMat.multiply(Vector3f.YP.rotationDegrees(-45));
+		ms.multiply(new Quaternion(Vec3f.POSITIVE_Y, time, true));
+		rotMat.multiply(new Quaternion(Vec3f.POSITIVE_Y, -time, true));
+		ms.multiply(new Quaternion(Vec3f.POSITIVE_Y, 45, true));
+		rotMat.multiply(new Quaternion(Vec3f.POSITIVE_Y, -45, true));
 		ms.translate(offX, 0, offZ);
 
 		// Finally apply the rotations
 		eye.transform(rotMat);
-		eye.perspectiveDivide();
+		eye.normalizeProjectiveCoordinates();
 		/* TODO XXX This does not handle visualization of sparse multiblocks correctly.
 			Dense multiblocks store everything in positive X/Z, so this works, but sparse multiblocks store everything from the JSON as-is.
 			Potential solution: Rotate around the offset vars of the multiblock, and add AABB method for extent of the multiblock
 		*/
-		renderElements(ms, multiblockObj, BlockPos.betweenClosed(BlockPos.ZERO, new BlockPos(sizeX - 1, sizeY - 1, sizeZ - 1)), eye);
+		renderElements(ms, multiblockObj, BlockPos.iterate(BlockPos.ORIGIN, new BlockPos(sizeX - 1, sizeY - 1, sizeZ - 1)), eye);
 
-		ms.popPose();
+		ms.pop();
 	}
 
 	private void renderElements(MatrixStack ms, AbstractMultiblock mb, Iterable<? extends BlockPos> blocks, Vector4f eye) {
-		ms.pushPose();
+		ms.push();
 		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 		ms.translate(0, 0, -1);
 
-		MultiBufferSource.BufferSource buffers = Minecraft.getInstance().renderBuffers().bufferSource();
+		VertexConsumerProvider buffers = MinecraftClient.getInstance().getBufferBuilders().getEffectVertexConsumers();
 		doWorldRenderPass(ms, mb, blocks, buffers, eye);
 		doTileEntityRenderPass(ms, mb, blocks, buffers, eye);
 
 		// todo 1.15 transparency sorting
-		buffers.endBatch();
-		ms.popPose();
+//		buffers.endBatch();
+		ms.pop();
 	}
 
-	private void doWorldRenderPass(MatrixStack ms, AbstractMultiblock mb, Iterable<? extends BlockPos> blocks, final @Nonnull MultiBufferSource.BufferSource buffers, Vector4f eye) {
+	private void doWorldRenderPass(MatrixStack ms, AbstractMultiblock mb, Iterable<? extends BlockPos> blocks,
+								   final @Nonnull VertexConsumerProvider buffers, Vector4f eye) {
 		for (BlockPos pos : blocks) {
 			BlockState bs = mb.getBlockState(pos);
-			VertexConsumer buffer = buffers.getBuffer(ItemBlockRenderTypes.getChunkRenderType(bs));
+			VertexConsumer buffer = buffers.getBuffer(RenderLayers.getBlockLayer(bs));
 
-			ms.pushPose();
+			ms.push();
 			ms.translate(pos.getX(), pos.getY(), pos.getZ());
-			Minecraft.getInstance().getBlockRenderer().renderBatched(bs, pos, mb, ms, buffer, false, RAND);
-			ms.popPose();
+			MinecraftClient.getInstance().getBlockRenderManager().renderBlock(bs, pos, mb, ms, buffer, false, RAND);
+			ms.pop();
 		}
 	}
 
 	// Hold errored TEs weakly, this may cause some dupe errors but will prevent spamming it every frame
 	private final transient Set<BlockEntity> erroredTiles = Collections.newSetFromMap(new WeakHashMap<>());
 
-	private void doTileEntityRenderPass(MatrixStack ms, AbstractMultiblock mb, Iterable<? extends BlockPos> blocks, MultiBufferSource buffers, Vector4f eye) {
+	private void doTileEntityRenderPass(MatrixStack ms, AbstractMultiblock mb, Iterable<? extends BlockPos> blocks,
+										VertexConsumerProvider buffers, Vector4f eye) {
 		for (BlockPos pos : blocks) {
 			BlockEntity te = mb.getBlockEntity(pos);
 			if (te != null && !erroredTiles.contains(te)) {
 				// Doesn't take pos anymore, maybe a problem?
-				te.setLevel(mc.level);
+				te.setWorld(mc.world);
 
 				// fake cached state in case the renderer checks it as we don't want to query the actual world
-				te.setBlockState(mb.getBlockState(pos));
+				te.setCachedState(mb.getBlockState(pos));
 
-				ms.pushPose();
+				ms.push();
 				ms.translate(pos.getX(), pos.getY(), pos.getZ());
 				try {
-					BlockEntityRenderer<BlockEntity> renderer = Minecraft.getInstance().getBlockEntityRenderDispatcher().getRenderer(te);
+					BlockEntityRenderer<BlockEntity> renderer = MinecraftClient.getInstance().getBlockEntityRenderDispatcher().get(te);
 					if (renderer != null) {
-						renderer.render(te, ClientTicker.partialTicks, ms, buffers, 0xF000F0, OverlayTexture.NO_OVERLAY);
+						renderer.render(te, ClientTicker.partialTicks, ms, buffers, 0xF000F0, OverlayTexture.DEFAULT_UV);
 					}
 				} catch (Exception e) {
 					erroredTiles.add(te);
 					Patchouli.LOGGER.error("An exception occured rendering tile entity", e);
 				} finally {
-					ms.popPose();
+					ms.pop();
 				}
 			}
 		}

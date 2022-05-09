@@ -178,9 +178,10 @@ public class GuiBookLanding extends GuiBook {
 			displayLexiconGui(new GuiBookLanding(book), false);
 			MinecraftClient.getInstance().player.sendMessage(MutableText.of(new TranslatableTextContent("patchouli.gui.lexicon.reloaded",
 					(System.currentTimeMillis() - time))), false);
-		} else {
-			displayLexiconGui(new GuiBookWriter(book), true);
-		}
+		}// else {
+		// TODO: Fix the Editor Menu
+//			displayLexiconGui(new GuiBookWriter(book), true);
+//		}
 	}
 
 	public void handleButtonResize(ButtonWidget button) {

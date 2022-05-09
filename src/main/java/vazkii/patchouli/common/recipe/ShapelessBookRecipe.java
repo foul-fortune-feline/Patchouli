@@ -1,8 +1,8 @@
 package vazkii.patchouli.common.recipe;
 
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.ShapelessRecipe;
+import net.minecraft.recipe.RecipeSerializer;
+import net.minecraft.recipe.ShapelessRecipe;
+import net.minecraft.util.Identifier;
 
 /**
  * Recipe type for shapeless book recipes.
@@ -12,7 +12,7 @@ import net.minecraft.world.item.crafting.ShapelessRecipe;
 public class ShapelessBookRecipe extends BookRecipe<ShapelessRecipe> {
 	public static final RecipeSerializer<ShapelessBookRecipe> SERIALIZER = new Serializer();
 
-	public ShapelessBookRecipe(ShapelessRecipe compose, ResourceLocation outputBook) {
+	public ShapelessBookRecipe(ShapelessRecipe compose, Identifier outputBook) {
 		super(compose, outputBook);
 	}
 
@@ -24,11 +24,11 @@ public class ShapelessBookRecipe extends BookRecipe<ShapelessRecipe> {
 	private static class Serializer extends WrapperSerializer<ShapelessRecipe, ShapelessBookRecipe> {
 		@Override
 		protected RecipeSerializer<ShapelessRecipe> getSerializer() {
-			return SHAPELESS_RECIPE;
+			return SHAPELESS;
 		}
 
 		@Override
-		protected ShapelessBookRecipe getRecipe(ShapelessRecipe recipe, ResourceLocation outputBook) {
+		protected ShapelessBookRecipe getRecipe(ShapelessRecipe recipe, Identifier outputBook) {
 			return new ShapelessBookRecipe(recipe, outputBook);
 		}
 	}

@@ -2,9 +2,7 @@ package vazkii.patchouli.client.book.template.variable;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-
-import net.minecraft.world.item.ItemStack;
-
+import net.minecraft.item.ItemStack;
 import vazkii.patchouli.common.util.ItemStackUtil;
 
 import java.util.ArrayList;

@@ -3,13 +3,11 @@ package vazkii.patchouli.common.multiblock;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.util.Pair;
-
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.block.state.BlockState;
-
+import net.minecraft.block.BlockState;
+import net.minecraft.util.BlockRotation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3i;
+import net.minecraft.world.World;
 import vazkii.patchouli.api.IStateMatcher;
 import vazkii.patchouli.common.util.RotationUtil;
 
@@ -46,30 +44,30 @@ public class SparseMultiblock extends AbstractMultiblock {
 
 	@Override
 	public BlockState getBlockState(BlockPos pos) {
-		int ticks = world != null ? (int) world.getDayTime() : 0;
+		int ticks = world != null ? (int) world.getTimeOfDay() : 0;
 		return data.getOrDefault(pos, StateMatcher.AIR).getDisplayedState(ticks);
 	}
 
 	@Override
-	public Pair<BlockPos, Collection<SimulateResult>> simulate(Level world, BlockPos anchor, Rotation rotation, boolean forView) {
+	public Pair<BlockPos, Collection<SimulateResult>> simulate(World world, BlockPos anchor, BlockRotation rotation, boolean forView) {
 		BlockPos disp = forView
 				? new BlockPos(-viewOffX, -viewOffY + 1, -viewOffZ).rotate(rotation)
 				: new BlockPos(-offX, -offY, -offZ).rotate(rotation);
 		// the local origin of this multiblock, in world coordinates
-		BlockPos origin = anchor.offset(disp);
+		BlockPos origin = anchor.add(disp);
 		List<SimulateResult> ret = new ArrayList<>();
 		for (Entry<BlockPos, IStateMatcher> e : data.entrySet()) {
 			BlockPos currDisp = e.getKey().rotate(rotation);
-			BlockPos actionPos = origin.offset(currDisp);
+			BlockPos actionPos = origin.add(currDisp);
 			ret.add(new SimulateResultImpl(actionPos, e.getValue(), null));
 		}
 		return Pair.of(origin, ret);
 	}
 
 	@Override
-	public boolean test(Level world, BlockPos start, int x, int y, int z, Rotation rotation) {
+	public boolean test(World world, BlockPos start, int x, int y, int z, BlockRotation rotation) {
 		setWorld(world);
-		BlockPos checkPos = start.offset(new BlockPos(x, y, z).rotate(rotation));
+		BlockPos checkPos = start.add(new BlockPos(x, y, z).rotate(rotation));
 		BlockState state = world.getBlockState(checkPos).rotate(RotationUtil.fixHorizontal(rotation));
 		IStateMatcher matcher = data.getOrDefault(new BlockPos(x, y, z), StateMatcher.ANY);
 		return matcher.getStatePredicate().test(world, checkPos, state);
@@ -82,7 +80,7 @@ public class SparseMultiblock extends AbstractMultiblock {
 	}
 
 	@Override
-	public int getMinBuildHeight() {
+	public int getBottomY() {
 		return 0;
 	}
 }

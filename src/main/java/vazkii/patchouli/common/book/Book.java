@@ -25,7 +25,7 @@ public class Book {
 
 	private static final String[] ORDINAL_SUFFIXES = new String[] { "th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th" };
 	public static final Identifier DEFAULT_MODEL = new Identifier(Patchouli.MOD_ID, "book_brown");
-	private static final Identifier UNICODE_FONT_ID = new Identifier(Patchouli.MOD_ID, "book_brown");
+	private static final Identifier UNICODE_FONT_ID = new Identifier(Patchouli.MOD_ID, "unicode_font");
 
 	private static final Map<String, String> DEFAULT_MACROS = Util.make(() -> {
 		Map<String, String> ret = new HashMap<>();

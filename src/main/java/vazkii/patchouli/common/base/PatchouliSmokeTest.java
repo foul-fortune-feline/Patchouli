@@ -1,12 +1,12 @@
 package vazkii.patchouli.common.base;
 
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
-import net.minecraft.gametest.framework.GameTest;
-import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.test.GameTest;
+import net.minecraft.test.TestRunner;
 
 public class PatchouliSmokeTest {
-	@GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
-	public void doesItRun(GameTestHelper helper) {
-		helper.succeed();
+	@GameTest(structureName = FabricGameTest.EMPTY_STRUCTURE)
+	public void doesItRun(TestRunner helper) {
+		helper.run();
 	}
 }

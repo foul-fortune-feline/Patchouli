@@ -1,16 +1,13 @@
 package vazkii.patchouli.common.base;
 
 import com.mojang.brigadier.CommandDispatcher;
-
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.commands.CommandSourceStack;
-
+import net.minecraft.server.command.ServerCommandSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import vazkii.patchouli.common.book.BookRegistry;
 import vazkii.patchouli.common.command.OpenBookCommand;
 import vazkii.patchouli.common.handler.LecternEventHandler;
@@ -43,7 +40,7 @@ public class Patchouli implements ModInitializer {
 		ReloadContentsHandler.init();
 	}
 
-	private void registerCommands(CommandDispatcher<CommandSourceStack> dispatcher, boolean dedicated) {
+	private void registerCommands(CommandDispatcher<ServerCommandSource> dispatcher, boolean dedicated) {
 		OpenBookCommand.register(dispatcher);
 	}
 }

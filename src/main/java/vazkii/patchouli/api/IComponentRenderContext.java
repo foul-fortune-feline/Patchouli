@@ -26,8 +26,8 @@ public interface IComponentRenderContext {
 
 	boolean isAreaHovered(int mouseX, int mouseY, int x, int y, int w, int h);
 
-	@Deprecated // use setHoverTooltipComponents
-	void setHoverTooltip(List<String> tooltip);
+//	@Deprecated // use setHoverTooltipComponents
+//	void setHoverTooltip(List<String> tooltip);
 
 	void setHoverTooltipComponents(List<Text> tooltip);
 

@@ -1,10 +1,8 @@
 package vazkii.patchouli.client.book.template.component;
 
 import com.google.gson.annotations.SerializedName;
-import com.mojang.blaze3d.vertex.MatrixStack;
-
-import net.minecraft.network.chat.Component;
-
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.Text;
 import vazkii.patchouli.api.IVariable;
 import vazkii.patchouli.client.book.BookPage;
 import vazkii.patchouli.client.book.gui.GuiBookEntry;
@@ -20,7 +18,7 @@ public class ComponentTooltip extends TemplateComponent {
 
 	int width, height;
 
-	transient List<Component> tooltip;
+	transient List<Text> tooltip;
 
 	@Override
 	public void onVariablesAvailable(UnaryOperator<IVariable> lookup) {
@@ -40,7 +38,7 @@ public class ComponentTooltip extends TemplateComponent {
 			//if (!s.isEmpty()) {
 			//	tooltip.add(new LiteralText(s));
 			//}
-			tooltip.add(s.as(Component.class));
+			tooltip.add(s.as(Text.class));
 		}
 	}
 
